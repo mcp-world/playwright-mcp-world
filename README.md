@@ -16,6 +16,7 @@ We've integrated features from several community forks:
 
 - **[viktor-silakov/playwright-mcp-advanced](https://github.com/viktor-silakov/playwright-mcp-advanced)** - Enhanced screenshot tools, HTML extraction, and element snapshots
 - **[nnamon/playwright-mcp](https://github.com/nnamon/playwright-mcp)** - JavaScript execution capabilities, Docker support, and improved build tooling
+- **[Verto-FX/playwright-mcp](https://github.com/Verto-FX/playwright-mcp)** - Video recording capabilities (see [#546](https://github.com/microsoft/playwright-mcp/issues/546), [#547](https://github.com/microsoft/playwright-mcp/pull/547))
 
 ### About Playwright MCP
 
