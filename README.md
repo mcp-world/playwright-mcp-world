@@ -29,33 +29,17 @@ A Model Context Protocol (MCP) server that provides browser automation capabilit
 
 ### 🚀 Advanced Features
 
-This advanced version includes additional capabilities not available in the original Playwright MCP:
+This version includes additional tools not available in the original Playwright MCP:
 
-#### 📸 Enhanced Screenshot Tools
-- **Full page screenshots** - Capture entire scrollable page content with `fullPage: true`
-- **Element screenshots by locator** - Screenshot specific elements using Playwright locators (`#id`, `.class`, `text=Hello`)
-- **Multiple element screenshots** - Capture multiple elements simultaneously with locator arrays
-- **Vision mode enhancements** - All screenshot capabilities available in vision mode
+- **`browser_evaluate`** - Execute JavaScript code in the browser context
+- **`browser_take_screenshot`** - Enhanced screenshot tool with fullPage and locator support
+- **`browser_get_html_content`** - Extract HTML content from pages or specific elements
+- **`browser_get_outer_html`** - Get complete element HTML including the element tag
+- **`browser_element_snapshot`** - Capture accessibility snapshots of specific elements by locator
 
-#### 🔍 HTML Content Extraction
-- **`browser_get_html_content`** - Extract HTML content from the entire page or specific elements
-- **`browser_get_outer_html`** - Get complete element HTML including the element tag itself
-- **Batch processing** - Extract HTML from multiple elements in parallel
-- **Error handling** - Graceful handling of missing elements
+### ⚠️ Experimental Notice
 
-#### 📋 Element Snapshot Tools
-- **`browser_element_snapshot`** - Capture accessibility snapshots of specific elements by locator(s)
-- **Structured element data** - Get tag names, text content, attributes, and visibility status
-- **Multiple element snapshots** - Process multiple elements simultaneously with locator arrays
-- **YAML formatted output** - Consistent format matching the main page snapshot tool
-
-#### 💡 Key Improvements
-- **Parallel execution** - Multiple operations execute simultaneously for better performance
-- **Smart validation** - Prevents conflicting parameter combinations
-- **Flexible locators** - Support for any Playwright locator syntax
-- **Multiple element handling** - When a single locator finds multiple elements, returns data for each element
-- **Developer-friendly** - Clear error messages and formatted output
-- **Vision mode compatibility** - All HTML extraction tools work in both snapshot and vision modes
+This project is currently experimental and may be unstable due to the nature of integrating features from multiple community forks. If you encounter any bugs or issues, please [file an issue](https://github.com/mcp-world/playwright-mcp-world/issues) on GitHub to help us improve.
 
 ### Requirements
 - Node.js 18 or newer
@@ -112,7 +96,7 @@ First, install the Playwright MCP server with your client.
 }
 ```
 
-[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D)
+[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540mcp-world%252Fplaywright-mcp-world%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540mcp-world%252Fplaywright-mcp-world%2540latest%2522%255D%257D)
 
 
 <details><summary><b>Install in VS Code</b></summary>
