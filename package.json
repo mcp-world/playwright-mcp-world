@@ -32,6 +32,10 @@
     "run-server": "tsx src/browserServer.ts",
     "dev": "mcp-server-playwright",
     "dev-watch": "tsx watch src/program.ts",
+    "docker:build": "make docker-build",
+    "docker:test": "make docker-test",
+    "docker:server": "make docker-server",
+    "docker:cleanup": "make docker-cleanup",
     "clean": "rm -rf lib",
     "release": "npm run clean && npm run update-readme && npm run build && npm run test && release-it  --increment"
   },

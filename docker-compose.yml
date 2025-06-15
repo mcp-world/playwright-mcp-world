@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Production MCP server
+  playwright-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: playwright-mcp:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./test-results:/app/test-results
+    environment:
+      - NODE_ENV=production
+
+  # Development MCP server with test dependencies
+  playwright-mcp-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: playwright-mcp-dev:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./test-results:/app/test-results
+      - ./src:/app/src
+      - ./tests:/app/tests
+    environment:
+      - NODE_ENV=development
+      - DEBUG=pw:mcp:test
+      - DEBUG_COLORS=0
+      - DEBUG_HIDE_DATE=1
+
+  # Test runner service
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: playwright-mcp-dev:latest
+    volumes:
+      - ./test-results:/app/test-results
+      - ./src:/app/src
+      - ./tests:/app/tests
+    environment:
+      - NODE_ENV=test
+      - MCP_IN_DOCKER=1
+    command: npm test
+    depends_on:
+      - playwright-mcp-dev
