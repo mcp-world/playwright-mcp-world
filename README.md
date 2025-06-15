@@ -759,6 +759,18 @@ X Y coordinate space, based on the provided screenshot.
 
 <!-- NOTE: This has been generated via update-readme.ts -->
 
+- **browser_evaluate**
+  - Title: Execute JavaScript
+  - Description: Execute JavaScript code in the browser context and return the result
+  - Parameters:
+    - `expression` (string): JavaScript expression or function to evaluate
+    - `args` (array, optional): Arguments to pass to the function (must be serializable)
+    - `awaitPromise` (boolean, optional): Whether to wait for promises to resolve
+    - `timeout` (number, optional): Maximum execution time in milliseconds
+  - Read-only: **false**
+
+<!-- NOTE: This has been generated via update-readme.ts -->
+
 - **browser_close**
   - Title: Close browser
   - Description: Close the page
