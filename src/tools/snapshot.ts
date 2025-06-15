@@ -41,6 +41,172 @@ const snapshot = defineTool({
   },
 });
 
+const elementSnapshotSchema = z.object({
+  locator: z.string().optional().describe('Playwright locator string to capture accessibility snapshot of a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with locators parameter.'),
+  locators: z.array(z.string()).optional().describe('Array of Playwright locator strings to capture accessibility snapshots of multiple elements. Cannot be combined with locator parameter.'),
+}).refine(data => {
+  const paramCount = [data.locator, data.locators].filter(Boolean).length;
+  return paramCount >= 1;
+}, {
+  message: 'Either locator or locators must be specified.',
+  path: ['locator', 'locators']
+});
+
+const elementSnapshot = defineTool({
+  capability: 'core',
+  schema: {
+    name: 'browser_element_snapshot',
+    title: 'Element snapshot',
+    description: 'Capture accessibility snapshot of specific elements by locator(s). Better than screenshot for specific elements.',
+    inputSchema: elementSnapshotSchema,
+    type: 'readOnly',
+    advanced: {
+      isNew: true,
+      enhancementNote: 'Capture structured accessibility data for specific elements using locators'
+    },
+  },
+
+  handle: async (context, params) => {
+    const tab = context.currentTabOrDie();
+    const isMultipleLocators = params.locators && params.locators.length > 0;
+    const isSingleLocator = params.locator;
+
+    let code: string[] = [];
+    let action: () => Promise<{ content: { type: 'text'; text: string }[] }> = async () => ({
+      content: [{ type: 'text', text: 'No action defined' }]
+    });
+
+    if (isMultipleLocators) {
+      code = [
+        `// Capture accessibility snapshots of multiple elements: ${params.locators!.join(', ')}`,
+        ...params.locators!.map(loc => `const snapshot_${params.locators!.indexOf(loc)} = await page.locator('${loc}').textContent();`)
+      ];
+
+      action = async () => {
+        const snapshots = await Promise.all(
+          params.locators!.map(async (loc, index) => {
+            try {
+              const locator = tab.page.locator(loc);
+              const isVisible = await locator.isVisible();
+              if (!isVisible)
+                return `### Element ${index + 1} (${loc}):\nElement not visible or not found`;
+
+
+              const text = await locator.textContent();
+              const tagName = await locator.evaluate(el => el.tagName.toLowerCase());
+              const attributes = await locator.evaluate(el => {
+                const attrs: Record<string, string> = {};
+                for (const attr of el.attributes)
+                  attrs[attr.name] = attr.value;
+
+                return attrs;
+              });
+
+              const result = [`### Element ${index + 1} (${loc}):`];
+              result.push('```yaml');
+              result.push(`- ${tagName}${attributes.id ? ` #${attributes.id}` : ''}${attributes.class ? ` .${attributes.class.split(' ').join('.')}` : ''}: ${text || 'No text content'}`);
+              if (Object.keys(attributes).length > 0) {
+                result.push(`  attributes:`);
+                for (const [key, value] of Object.entries(attributes))
+                  result.push(`    ${key}: "${value}"`);
+
+              }
+              result.push('```');
+              return result.join('\n');
+            } catch (error) {
+              return `### Element ${index + 1} (${loc}):\nError: ${(error as Error).message}`;
+            }
+          })
+        );
+        return {
+          content: [{
+            type: 'text' as 'text',
+            text: snapshots.join('\n\n')
+          }]
+        };
+      };
+    } else if (isSingleLocator) {
+      code = [
+        `// Capture accessibility snapshot of element(s) by locator: ${params.locator}`,
+        `const elements = await page.locator('${params.locator}').all();`,
+        `const snapshots = await Promise.all(elements.map(async el => ({ text: await el.textContent(), tag: await el.evaluate(e => e.tagName.toLowerCase()), attrs: await el.evaluate(e => Array.from(e.attributes).reduce((acc, attr) => ({ ...acc, [attr.name]: attr.value }), {})) })));`
+      ];
+
+      action = async () => {
+        try {
+          const locator = tab.page.locator(params.locator!);
+          const elements = await locator.all();
+
+          if (elements.length === 0) {
+            return {
+              content: [{
+                type: 'text' as 'text',
+                text: `### Element Snapshot (${params.locator}):\nNo elements found with this locator`
+              }]
+            };
+          }
+
+          const snapshots = await Promise.all(
+              elements.map(async (element, index) => {
+                try {
+                  const isVisible = await element.isVisible();
+                  if (!isVisible)
+                    return `### Element ${index + 1} (${params.locator}):\nElement not visible`;
+
+
+                  const text = await element.textContent();
+                  const tagName = await element.evaluate(el => el.tagName.toLowerCase());
+                  const attributes = await element.evaluate(el => {
+                    const attrs: Record<string, string> = {};
+                    for (const attr of el.attributes)
+                      attrs[attr.name] = attr.value;
+
+                    return attrs;
+                  });
+
+                  const result = [`### Element ${index + 1} (${params.locator}):`];
+                  result.push('```yaml');
+                  result.push(`- ${tagName}${attributes.id ? ` #${attributes.id}` : ''}${attributes.class ? ` .${attributes.class.split(' ').join('.')}` : ''}: ${text || 'No text content'}`);
+                  if (Object.keys(attributes).length > 0) {
+                    result.push(`  attributes:`);
+                    for (const [key, value] of Object.entries(attributes))
+                      result.push(`    ${key}: "${value}"`);
+
+                  }
+                  result.push('```');
+                  return result.join('\n');
+                } catch (error) {
+                  return `### Element ${index + 1} (${params.locator}):\nError: ${(error as Error).message}`;
+                }
+              })
+          );
+
+          return {
+            content: [{
+              type: 'text' as 'text',
+              text: snapshots.join('\n\n')
+            }]
+          };
+        } catch (error) {
+          return {
+            content: [{
+              type: 'text' as 'text',
+              text: `### Element Snapshot (${params.locator}):\nError: ${(error as Error).message}`
+            }]
+          };
+        }
+      };
+    }
+
+    return {
+      code,
+      action,
+      captureSnapshot: false,
+      waitForNetwork: false,
+    };
+  }
+});
+
 const elementSchema = z.object({
   element: z.string().describe('Human-readable element description used to obtain permission to interact with the element'),
   ref: z.string().describe('Exact target element reference from the page snapshot'),
@@ -218,6 +384,7 @@ const selectOption = defineTool({
 
 export default [
   snapshot,
+  elementSnapshot,
   click,
   drag,
   hover,

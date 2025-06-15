@@ -26,6 +26,12 @@ export type ToolSchema<Input extends InputType> = {
   description: string;
   inputSchema: Input;
   type: 'readOnly' | 'destructive';
+  // Advanced metadata for documentation generation
+  advanced?: {
+    isNew?: boolean;       // 🆕 New tool
+    isEnhanced?: boolean;  // ⭐ Enhanced with additional features
+    enhancementNote?: string; // Description of enhancements
+  };
 };
 
 type InputType = z.Schema;

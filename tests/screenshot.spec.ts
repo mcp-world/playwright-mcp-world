@@ -67,7 +67,7 @@ test('browser_take_screenshot (element)', async ({ startClient, server }, testIn
         type: 'image',
       },
       {
-        text: expect.stringContaining(`page.getByText('Hello, world!').screenshot`),
+        text: expect.stringContaining(`getByText('Hello, world!').screenshot`),
         type: 'text',
       },
     ],
@@ -225,6 +225,157 @@ test('browser_take_screenshot (cursor)', async ({ startClient, server }, testInf
     content: [
       {
         text: expect.stringContaining(`Screenshot viewport and save it as`),
+        type: 'text',
+      },
+    ],
+  });
+});
+
+test('browser_take_screenshot (fullPage)', async ({ startClient, server }, testInfo) => {
+  const { client } = await startClient({
+    config: { outputDir: testInfo.outputPath('output') },
+  });
+
+  // Create a page with scrollable content
+  server.setContent('/long-page', `
+    <title>Long Page</title>
+    <body>
+      <div style="height: 2000px; background: linear-gradient(to bottom, red, blue);">
+        <h1>Top of page</h1>
+        <div style="position: absolute; bottom: 0;">Bottom of page</div>
+      </div>
+    </body>
+  `, 'text/html');
+
+  expect(await client.callTool({
+    name: 'browser_navigate',
+    arguments: { url: `${server.PREFIX}long-page` },
+  })).toContainTextContent(`Navigate to http://localhost`);
+
+  expect(await client.callTool({
+    name: 'browser_take_screenshot',
+    arguments: { fullPage: true },
+  })).toEqual({
+    content: [
+      {
+        data: expect.any(String),
+        mimeType: 'image/jpeg',
+        type: 'image',
+      },
+      {
+        text: expect.stringContaining(`Screenshot full page and save it as`),
+        type: 'text',
+      },
+    ],
+  });
+});
+
+test('browser_take_screenshot (locator - single element)', async ({ startClient, server }, testInfo) => {
+  const { client } = await startClient({
+    config: { outputDir: testInfo.outputPath('output') },
+  });
+
+  server.setContent('/single-button', `
+    <title>Single Button</title>
+    <body>
+      <button id="test-btn">Click me</button>
+    </body>
+  `, 'text/html');
+
+  expect(await client.callTool({
+    name: 'browser_navigate',
+    arguments: { url: `${server.PREFIX}single-button` },
+  })).toContainTextContent(`Navigate to http://localhost`);
+
+  expect(await client.callTool({
+    name: 'browser_take_screenshot',
+    arguments: { locator: '#test-btn' },
+  })).toEqual({
+    content: [
+      {
+        data: expect.any(String),
+        mimeType: 'image/jpeg',
+        type: 'image',
+      },
+      {
+        text: expect.stringContaining(`Screenshot element(s) by locator "#test-btn" and save it as`),
+        type: 'text',
+      },
+    ],
+  });
+});
+
+test('browser_take_screenshot (locator - multiple elements)', async ({ startClient, server }, testInfo) => {
+  const { client } = await startClient({
+    config: { outputDir: testInfo.outputPath('output') },
+  });
+
+  server.setContent('/multiple-buttons', `
+    <title>Multiple Buttons</title>
+    <body>
+      <button class="btn">Button 1</button>
+      <button class="btn">Button 2</button>
+      <button class="btn">Button 3</button>
+    </body>
+  `, 'text/html');
+
+  expect(await client.callTool({
+    name: 'browser_navigate',
+    arguments: { url: `${server.PREFIX}multiple-buttons` },
+  })).toContainTextContent(`Navigate to http://localhost`);
+
+  const result = await client.callTool({
+    name: 'browser_take_screenshot',
+    arguments: { locator: '.btn' },
+  });
+
+  expect(result).toEqual({
+    content: [
+      {
+        data: expect.any(String),
+        mimeType: 'image/jpeg',
+        type: 'image',
+      },
+      {
+        data: expect.any(String),
+        mimeType: 'image/jpeg',
+        type: 'image',
+      },
+      {
+        data: expect.any(String),
+        mimeType: 'image/jpeg',
+        type: 'image',
+      },
+      {
+        text: expect.stringContaining(`Screenshot element(s) by locator ".btn" and save it as`),
+        type: 'text',
+      },
+    ],
+  });
+});
+
+test('browser_take_screenshot (locator - no elements found)', async ({ startClient, server }, testInfo) => {
+  const { client } = await startClient({
+    config: { outputDir: testInfo.outputPath('output') },
+  });
+
+  expect(await client.callTool({
+    name: 'browser_navigate',
+    arguments: { url: server.HELLO_WORLD },
+  })).toContainTextContent(`Navigate to http://localhost`);
+
+  expect(await client.callTool({
+    name: 'browser_take_screenshot',
+    arguments: { locator: '.non-existent' },
+  })).toEqual({
+    content: [
+      {
+        data: expect.any(String),
+        mimeType: 'image/jpeg',
+        type: 'image',
+      },
+      {
+        text: expect.stringContaining(`Screenshot element(s) by locator ".non-existent" and save it as`),
         type: 'text',
       },
     ],

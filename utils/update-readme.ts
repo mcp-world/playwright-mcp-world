@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S npx tsx
 /**
  * Copyright (c) Microsoft Corporation.
  *
@@ -14,29 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-check
 
-import fs from 'node:fs'
-import path from 'node:path'
-import url from 'node:url'
-import zodToJsonSchema from 'zod-to-json-schema'
-
-import commonTools from '../lib/tools/common.js';
-import consoleTools from '../lib/tools/console.js';
-import dialogsTools from '../lib/tools/dialogs.js';
-import filesTools from '../lib/tools/files.js';
-import installTools from '../lib/tools/install.js';
-import keyboardTools from '../lib/tools/keyboard.js';
-import navigateTools from '../lib/tools/navigate.js';
-import networkTools from '../lib/tools/network.js';
-import pdfTools from '../lib/tools/pdf.js';
-import snapshotTools from '../lib/tools/snapshot.js';
-import tabsTools from '../lib/tools/tabs.js';
-import screenshotTools from '../lib/tools/screenshot.js';
-import testTools from '../lib/tools/testing.js';
-import visionTools from '../lib/tools/vision.js';
-import waitTools from '../lib/tools/wait.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import url from 'node:url';
 import { execSync } from 'node:child_process';
+import zodToJsonSchema from 'zod-to-json-schema';
+
+import commonTools from '../src/tools/common.js';
+import consoleTools from '../src/tools/console.js';
+import dialogsTools from '../src/tools/dialogs.js';
+import filesTools from '../src/tools/files.js';
+import htmlTools from '../src/tools/html.js';
+import installTools from '../src/tools/install.js';
+import keyboardTools from '../src/tools/keyboard.js';
+import navigateTools from '../src/tools/navigate.js';
+import networkTools from '../src/tools/network.js';
+import pdfTools from '../src/tools/pdf.js';
+import snapshotTools from '../src/tools/snapshot.js';
+import tabsTools from '../src/tools/tabs.js';
+import screenshotTools from '../src/tools/screenshot.js';
+import testTools from '../src/tools/testing.js';
+import visionTools from '../src/tools/vision.js';
+import waitTools from '../src/tools/wait.js';
+
+import type { ToolSchema } from '../src/tools/tool.js';
 
 const categories = {
   'Interactions': [
@@ -54,6 +56,7 @@ const categories = {
     ...pdfTools,
     ...networkTools,
     ...consoleTools,
+    ...htmlTools,
   ],
   'Utilities': [
     ...installTools,
@@ -67,35 +70,43 @@ const categories = {
   ],
   'Vision mode': [
     ...visionTools,
-    ...keyboardTools(),
+    ...keyboardTools(false),
     ...waitTools(false),
     ...filesTools(false),
     ...dialogsTools(false),
+    ...htmlTools,
   ],
 };
 
-// NOTE: Can be removed when we drop Node.js 18 support and changed to import.meta.filename.
 const __filename = url.fileURLToPath(import.meta.url);
 
-/**
- * @param {import('../src/tools/tool.js').ToolSchema<any>} tool 
- * @returns {string[]}
- */
-function formatToolForReadme(tool) {
-  const lines = /** @type {string[]} */ ([]);
-  lines.push(`<!-- NOTE: This has been generated via ${path.basename(__filename)} -->`);
+function formatToolForReadme(tool: ToolSchema<any>): string[] {
+  const lines: string[] = [];
+  lines.push(`<!-- NOTE: This has been generated via update-readme.ts -->`);
   lines.push(``);
-  lines.push(`- **${tool.name}**`);
+
+  // Build title with emojis based on metadata
+  let titleLine = `- **${tool.name}**`;
+  if (tool.advanced?.isNew)
+    titleLine += ` 🆕`;
+  if (tool.advanced?.isEnhanced)
+    titleLine += ` ⭐`;
+  lines.push(titleLine);
+  
   lines.push(`  - Title: ${tool.title}`);
   lines.push(`  - Description: ${tool.description}`);
+  
+  // Add enhancement note if present
+  if (tool.advanced?.enhancementNote)
+    lines.push(`  - **Enhancement**: ${tool.advanced.enhancementNote}`);
 
-  const inputSchema = /** @type {any} */ (zodToJsonSchema(tool.inputSchema || {}));
+  const inputSchema = zodToJsonSchema(tool.inputSchema || {}) as any;
   const requiredParams = inputSchema.required || [];
   if (inputSchema.properties && Object.keys(inputSchema.properties).length) {
     lines.push(`  - Parameters:`);
-    Object.entries(inputSchema.properties).forEach(([name, param]) => {
+    Object.entries(inputSchema.properties).forEach(([name, param]: [string, any]) => {
       const optional = !requiredParams.includes(name);
-      const meta = /** @type {string[]} */ ([]);
+      const meta: string[] = [];
       if (param.type)
         meta.push(param.type);
       if (optional)
@@ -110,14 +121,12 @@ function formatToolForReadme(tool) {
   return lines;
 }
 
-/**
- * @param {string} content
- * @param {string} startMarker
- * @param {string} endMarker
- * @param {string[]} generatedLines
- * @returns {Promise<string>}
- */
-async function updateSection(content, startMarker, endMarker, generatedLines) {
+async function updateSection(
+  content: string,
+  startMarker: string,
+  endMarker: string,
+  generatedLines: string[]
+): Promise<string> {
   const startMarkerIndex = content.indexOf(startMarker);
   const endMarkerIndex = content.indexOf(endMarker);
   if (startMarkerIndex === -1 || endMarkerIndex === -1)
@@ -132,17 +141,8 @@ async function updateSection(content, startMarker, endMarker, generatedLines) {
   ].join('\n');
 }
 
-/**
- * @param {string} content
- * @returns {Promise<string>}
- */
-async function updateTools(content) {
-  console.log('Loading tool information from compiled modules...');
-
-  const totalTools = Object.values(categories).flat().length;
-  console.log(`Found ${totalTools} tools`);
-
-  const generatedLines = /** @type {string[]} */ ([]);
+async function updateTools(content: string): Promise<string> {
+  const generatedLines: string[] = [];
   for (const [category, categoryTools] of Object.entries(categories)) {
     generatedLines.push(`<details>\n<summary><b>${category}</b></summary>`);
     generatedLines.push('');
@@ -152,43 +152,36 @@ async function updateTools(content) {
     generatedLines.push('');
   }
 
-  const startMarker = `<!--- Tools generated by ${path.basename(__filename)} -->`;
+  const startMarker = `<!--- Tools generated by update-readme.ts -->`;
   const endMarker = `<!--- End of tools generated section -->`;
   return updateSection(content, startMarker, endMarker, generatedLines);
 }
 
-/**
- * @param {string} content
- * @returns {Promise<string>}
- */
-async function updateOptions(content) {
-  console.log('Listing options...');
+async function updateOptions(content: string): Promise<string> {
   const output = execSync('node cli.js --help');
   const lines = output.toString().split('\n');
   const firstLine = lines.findIndex(line => line.includes('--version'));
   lines.splice(0, firstLine + 1);
   const lastLine = lines.findIndex(line => line.includes('--help'));
   lines.splice(lastLine);
-  const startMarker = `<!--- Options generated by ${path.basename(__filename)} -->`;
+  const startMarker = `<!--- Options generated by update-readme.ts -->`;
   const endMarker = `<!--- End of options generated section -->`;
   return updateSection(content, startMarker, endMarker, [
     '```',
-    '> npx @playwright/mcp@latest --help',
+    '> npx playwright-mcp-advanced@latest --help',
     ...lines,
     '```',
   ]);
 }
 
-async function updateReadme() {
+async function updateReadme(): Promise<void> {
   const readmePath = path.join(path.dirname(__filename), '..', 'README.md');
   const readmeContent = await fs.promises.readFile(readmePath, 'utf-8');
   const withTools = await updateTools(readmeContent);
   const withOptions = await updateOptions(withTools);
   await fs.promises.writeFile(readmePath, withOptions, 'utf-8');
-  console.log('README updated successfully');
 }
 
 updateReadme().catch(err => {
-  console.error('Error updating README:', err);
   process.exit(1);
-});
+}); 

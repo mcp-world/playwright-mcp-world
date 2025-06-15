@@ -23,30 +23,108 @@ const elementSchema = z.object({
   element: z.string().describe('Human-readable element description used to obtain permission to interact with the element'),
 });
 
+const screenshotSchema = z.object({
+  fullPage: z.boolean().optional().describe('Whether to take a screenshot of the full scrollable page. Cannot be combined with locator/locators parameters.'),
+  locator: z.string().optional().describe('Playwright locator string to screenshot a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with fullPage/locators parameters.'),
+  locators: z.array(z.string()).optional().describe('Array of Playwright locator strings to screenshot multiple elements. Cannot be combined with fullPage/locator parameters.'),
+}).refine(data => {
+  const paramCount = [data.fullPage, data.locator, data.locators].filter(Boolean).length;
+  return paramCount <= 1;
+}, {
+  message: 'Only one of fullPage, locator, or locators can be specified.',
+  path: ['fullPage', 'locator', 'locators']
+});
+
 const screenshot = defineTool({
   capability: 'core',
   schema: {
     name: 'browser_screen_capture',
     title: 'Take a screenshot',
     description: 'Take a screenshot of the current page',
-    inputSchema: z.object({}),
+    inputSchema: screenshotSchema,
     type: 'readOnly',
+    advanced: {
+      isEnhanced: true,
+      enhancementNote: 'Enhanced with fullPage and locator/locators support for flexible vision mode capture'
+    },
   },
 
-  handle: async context => {
+  handle: async (context, params) => {
     const tab = await context.ensureTab();
-    const options = { type: 'jpeg' as 'jpeg', quality: 50, scale: 'css' as 'css' };
+    const options = {
+      type: 'jpeg' as 'jpeg',
+      quality: 50,
+      scale: 'css' as 'css',
+      fullPage: params.fullPage || false
+    };
 
-    const code = [
-      `// Take a screenshot of the current page`,
-      `await page.screenshot(${javascript.formatObject(options)});`,
-    ];
+    const isMultipleLocators = params.locators && params.locators.length > 0;
+    const isSingleLocator = params.locator;
+    const screenshotType = params.fullPage ? 'full page' : (isSingleLocator ? 'element' : (isMultipleLocators ? 'multiple elements' : 'viewport'));
 
-    const action = () => tab.page.screenshot(options).then(buffer => {
-      return {
-        content: [{ type: 'image' as 'image', data: buffer.toString('base64'), mimeType: 'image/jpeg' }],
+    let code: string[] = [];
+    let action: () => Promise<{ content: { type: 'image'; data: string; mimeType: string }[] }>;
+
+    if (isMultipleLocators) {
+      code = [
+        `// Take screenshots of multiple elements: ${params.locators!.join(', ')}`,
+        ...params.locators!.map(loc => `await page.locator('${loc}').screenshot(${javascript.formatObject(options)});`)
+      ];
+
+      action = async () => {
+        const screenshots = await Promise.all(
+          params.locators!.map(loc => tab.page.locator(loc).screenshot(options))
+        );
+        return {
+          content: screenshots.map(buffer => ({
+            type: 'image' as 'image',
+            data: buffer.toString('base64'),
+            mimeType: 'image/jpeg'
+          }))
+        };
       };
-    });
+    } else if (isSingleLocator) {
+      code = [
+        `// Take screenshot of element(s) by locator: ${params.locator}`,
+        `const elements = await page.locator('${params.locator}').all();`,
+        `const screenshots = await Promise.all(elements.map(el => el.screenshot(${javascript.formatObject(options)})));`
+      ];
+
+      action = async () => {
+        const locator = tab.page.locator(params.locator!);
+        const elements = await locator.all();
+
+        if (elements.length === 0) {
+          return {
+            content: []
+          };
+        }
+
+        const screenshots = await Promise.all(
+            elements.map(element => element.screenshot(options))
+        );
+
+        return {
+          content: screenshots.map(buffer => ({
+            type: 'image' as 'image',
+            data: buffer.toString('base64'),
+            mimeType: 'image/jpeg'
+          }))
+        };
+      };
+    } else {
+      code = [
+        `// Take a screenshot of the ${screenshotType}`,
+        `await page.screenshot(${javascript.formatObject(options)});`
+      ];
+
+      action = async () => {
+        const buffer = await tab.page.screenshot(options);
+        return {
+          content: [{ type: 'image' as 'image', data: buffer.toString('base64'), mimeType: 'image/jpeg' }]
+        };
+      };
+    }
 
     return {
       code,
