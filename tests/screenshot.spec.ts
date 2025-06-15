@@ -27,20 +27,24 @@ test('browser_take_screenshot (viewport)', async ({ startClient, server }, testI
     arguments: { url: server.HELLO_WORLD },
   })).toContainTextContent(`Navigate to http://localhost`);
 
-  expect(await client.callTool({
+  const result = await client.callTool({
     name: 'browser_take_screenshot',
-  })).toEqual({
-    content: [
-      {
-        data: expect.any(String),
-        mimeType: 'image/jpeg',
-        type: 'image',
-      },
-      {
-        text: expect.stringContaining(`Screenshot viewport and save it as`),
-        type: 'text',
-      },
-    ],
+  });
+  
+  // Check that we have the expected content structure
+  expect(result.content).toHaveLength(3);
+  expect(result.content[0]).toEqual({
+    type: 'text',
+    text: expect.stringMatching(/Screenshot taken \(\d+ bytes, JPEG\)/)
+  });
+  expect(result.content[1]).toEqual({
+    type: 'image',
+    data: expect.any(String),
+    mimeType: 'image/jpeg',
+  });
+  expect(result.content[2]).toEqual({
+    type: 'text',
+    text: expect.stringContaining('Ran Playwright code:')
   });
 });
 
@@ -53,24 +57,27 @@ test('browser_take_screenshot (element)', async ({ startClient, server }, testIn
     arguments: { url: server.HELLO_WORLD },
   })).toContainTextContent(`[ref=e1]`);
 
-  expect(await client.callTool({
+  const result = await client.callTool({
     name: 'browser_take_screenshot',
     arguments: {
       element: 'hello button',
       ref: 'e1',
     },
-  })).toEqual({
-    content: [
-      {
-        data: expect.any(String),
-        mimeType: 'image/jpeg',
-        type: 'image',
-      },
-      {
-        text: expect.stringContaining(`getByText('Hello, world!').screenshot`),
-        type: 'text',
-      },
-    ],
+  });
+  
+  expect(result.content).toHaveLength(3);
+  expect(result.content[0]).toEqual({
+    type: 'text',
+    text: expect.stringMatching(/Screenshot taken \(\d+ bytes, JPEG\)/)
+  });
+  expect(result.content[1]).toEqual({
+    type: 'image',
+    data: expect.any(String),
+    mimeType: 'image/jpeg',
+  });
+  expect(result.content[2]).toEqual({
+    type: 'text',
+    text: expect.stringContaining(`getByText('Hello, world!').screenshot`)
   });
 });
 
@@ -106,23 +113,24 @@ for (const raw of [undefined, true]) {
       arguments: { url: server.PREFIX },
     })).toContainTextContent(`Navigate to http://localhost`);
 
-    expect(await client.callTool({
+    const result = await client.callTool({
       name: 'browser_take_screenshot',
       arguments: { raw },
-    })).toEqual({
-      content: [
-        {
-          data: expect.any(String),
-          mimeType: `image/${ext}`,
-          type: 'image',
-        },
-        {
-          text: expect.stringMatching(
-              new RegExp(`page-\\d{4}-\\d{2}-\\d{2}T\\d{2}-\\d{2}-\\d{2}\\-\\d{3}Z\\.${ext}`)
-          ),
-          type: 'text',
-        },
-      ],
+    });
+    
+    expect(result.content).toHaveLength(3);
+    expect(result.content[0]).toEqual({
+      type: 'text',
+      text: expect.stringMatching(new RegExp(`Screenshot taken \\(\\d+ bytes, ${ext.toUpperCase()}\\)`))
+    });
+    expect(result.content[1]).toEqual({
+      type: 'image',
+      data: expect.any(String),
+      mimeType: `image/${ext}`,
+    });
+    expect(result.content[2]).toEqual({
+      type: 'text',
+      text: expect.stringContaining('Ran Playwright code:')
     });
 
     const files = [...fs.readdirSync(outputDir)].filter(f => f.endsWith(`.${ext}`));
@@ -146,23 +154,26 @@ test('browser_take_screenshot (filename: "output.jpeg")', async ({ startClient, 
     arguments: { url: server.HELLO_WORLD },
   })).toContainTextContent(`Navigate to http://localhost`);
 
-  expect(await client.callTool({
+  const result = await client.callTool({
     name: 'browser_take_screenshot',
     arguments: {
       filename: 'output.jpeg',
     },
-  })).toEqual({
-    content: [
-      {
-        data: expect.any(String),
-        mimeType: 'image/jpeg',
-        type: 'image',
-      },
-      {
-        text: expect.stringContaining(`output.jpeg`),
-        type: 'text',
-      },
-    ],
+  });
+  
+  expect(result.content).toHaveLength(3);
+  expect(result.content[0]).toEqual({
+    type: 'text',
+    text: expect.stringMatching(/Screenshot taken \(\d+ bytes, JPEG\)/)
+  });
+  expect(result.content[1]).toEqual({
+    type: 'image',
+    data: expect.any(String),
+    mimeType: 'image/jpeg',
+  });
+  expect(result.content[2]).toEqual({
+    type: 'text',
+    text: expect.stringContaining('output.jpeg')
   });
 
   const files = [...fs.readdirSync(outputDir)].filter(f => f.endsWith('.jpeg'));
@@ -190,15 +201,19 @@ test('browser_take_screenshot (imageResponses=omit)', async ({ startClient, serv
     name: 'browser_take_screenshot',
   });
 
-  expect(await client.callTool({
+  const result = await client.callTool({
     name: 'browser_take_screenshot',
-  })).toEqual({
-    content: [
-      {
-        text: expect.stringContaining(`Screenshot viewport and save it as`),
-        type: 'text',
-      },
-    ],
+  });
+  
+  // When imageResponses is 'omit', we should only get text content
+  expect(result.content).toHaveLength(2);
+  expect(result.content[0]).toEqual({
+    type: 'text',
+    text: expect.stringMatching(/Screenshot taken \(\d+ bytes, JPEG\)/)
+  });
+  expect(result.content[1]).toEqual({
+    type: 'text',
+    text: expect.stringContaining('Ran Playwright code:')
   });
 });
 
@@ -219,15 +234,19 @@ test('browser_take_screenshot (cursor)', async ({ startClient, server }, testInf
     name: 'browser_take_screenshot',
   });
 
-  expect(await client.callTool({
+  const result = await client.callTool({
     name: 'browser_take_screenshot',
-  })).toEqual({
-    content: [
-      {
-        text: expect.stringContaining(`Screenshot viewport and save it as`),
-        type: 'text',
-      },
-    ],
+  });
+  
+  // Cursor client should not include images
+  expect(result.content).toHaveLength(2);
+  expect(result.content[0]).toEqual({
+    type: 'text',
+    text: expect.stringMatching(/Screenshot taken \(\d+ bytes, JPEG\)/)
+  });
+  expect(result.content[1]).toEqual({
+    type: 'text',
+    text: expect.stringContaining('Ran Playwright code:')
   });
 });
 
@@ -252,21 +271,24 @@ test('browser_take_screenshot (fullPage)', async ({ startClient, server }, testI
     arguments: { url: `${server.PREFIX}long-page` },
   })).toContainTextContent(`Navigate to http://localhost`);
 
-  expect(await client.callTool({
+  const result = await client.callTool({
     name: 'browser_take_screenshot',
     arguments: { fullPage: true },
-  })).toEqual({
-    content: [
-      {
-        data: expect.any(String),
-        mimeType: 'image/jpeg',
-        type: 'image',
-      },
-      {
-        text: expect.stringContaining(`Screenshot full page and save it as`),
-        type: 'text',
-      },
-    ],
+  });
+  
+  expect(result.content).toHaveLength(3);
+  expect(result.content[0]).toEqual({
+    type: 'text',
+    text: expect.stringMatching(/Screenshot taken \(\d+ bytes, JPEG\)/)
+  });
+  expect(result.content[1]).toEqual({
+    type: 'image',
+    data: expect.any(String),
+    mimeType: 'image/jpeg',
+  });
+  expect(result.content[2]).toEqual({
+    type: 'text',
+    text: expect.stringContaining('fullPage: true')
   });
 });
 
@@ -287,21 +309,24 @@ test('browser_take_screenshot (locator - single element)', async ({ startClient,
     arguments: { url: `${server.PREFIX}single-button` },
   })).toContainTextContent(`Navigate to http://localhost`);
 
-  expect(await client.callTool({
+  const result = await client.callTool({
     name: 'browser_take_screenshot',
     arguments: { locator: '#test-btn' },
-  })).toEqual({
-    content: [
-      {
-        data: expect.any(String),
-        mimeType: 'image/jpeg',
-        type: 'image',
-      },
-      {
-        text: expect.stringContaining(`Screenshot element(s) by locator "#test-btn" and save it as`),
-        type: 'text',
-      },
-    ],
+  });
+  
+  expect(result.content).toHaveLength(3);
+  expect(result.content[0]).toEqual({
+    type: 'text',
+    text: expect.stringMatching(/Screenshot taken of 1 element\(s\) matching locator "#test-btn" \(JPEG\)/)
+  });
+  expect(result.content[1]).toEqual({
+    type: 'image',
+    data: expect.any(String),
+    mimeType: 'image/jpeg',
+  });
+  expect(result.content[2]).toEqual({
+    type: 'text',
+    text: expect.stringContaining('locator(\'#test-btn\')')
   });
 });
 
@@ -329,28 +354,31 @@ test('browser_take_screenshot (locator - multiple elements)', async ({ startClie
     arguments: { locator: '.btn' },
   });
 
-  expect(result).toEqual({
-    content: [
-      {
-        data: expect.any(String),
-        mimeType: 'image/jpeg',
-        type: 'image',
-      },
-      {
-        data: expect.any(String),
-        mimeType: 'image/jpeg',
-        type: 'image',
-      },
-      {
-        data: expect.any(String),
-        mimeType: 'image/jpeg',
-        type: 'image',
-      },
-      {
-        text: expect.stringContaining(`Screenshot element(s) by locator ".btn" and save it as`),
-        type: 'text',
-      },
-    ],
+  // Should have text + 3 images + code text = 5 elements
+  expect(result.content).toHaveLength(5);
+  expect(result.content[0]).toEqual({
+    type: 'text',
+    text: expect.stringMatching(/Screenshot taken of 3 element\(s\) matching locator "\.btn" \(JPEG\)/)
+  });
+  // Three images
+  expect(result.content[1]).toEqual({
+    type: 'image',
+    data: expect.any(String),
+    mimeType: 'image/jpeg',
+  });
+  expect(result.content[2]).toEqual({
+    type: 'image',
+    data: expect.any(String),
+    mimeType: 'image/jpeg',
+  });
+  expect(result.content[3]).toEqual({
+    type: 'image',
+    data: expect.any(String),
+    mimeType: 'image/jpeg',
+  });
+  expect(result.content[4]).toEqual({
+    type: 'text',
+    text: expect.stringContaining("locator('.btn')")
   });
 });
 
@@ -364,20 +392,23 @@ test('browser_take_screenshot (locator - no elements found)', async ({ startClie
     arguments: { url: server.HELLO_WORLD },
   })).toContainTextContent(`Navigate to http://localhost`);
 
-  expect(await client.callTool({
+  const result = await client.callTool({
     name: 'browser_take_screenshot',
     arguments: { locator: '.non-existent' },
-  })).toEqual({
-    content: [
-      {
-        data: expect.any(String),
-        mimeType: 'image/jpeg',
-        type: 'image',
-      },
-      {
-        text: expect.stringContaining(`Screenshot element(s) by locator ".non-existent" and save it as`),
-        type: 'text',
-      },
-    ],
+  });
+  
+  expect(result.content).toHaveLength(3);
+  expect(result.content[0]).toEqual({
+    type: 'text',
+    text: expect.stringContaining('No elements found for locator ".non-existent". Screenshot of full page taken')
+  });
+  expect(result.content[1]).toEqual({
+    type: 'image',
+    data: expect.any(String),
+    mimeType: 'image/jpeg',
+  });
+  expect(result.content[2]).toEqual({
+    type: 'text',
+    text: expect.stringContaining("locator('.non-existent')")
   });
 });

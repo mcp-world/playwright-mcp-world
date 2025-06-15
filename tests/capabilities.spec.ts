@@ -23,6 +23,7 @@ test('test snapshot tool list', async ({ client }) => {
     'browser_console_messages',
     'browser_drag',
     'browser_element_snapshot',
+    'browser_evaluate',
     'browser_file_upload',
     'browser_generate_playwright_test',
     'browser_get_html_content',
@@ -47,6 +48,9 @@ test('test snapshot tool list', async ({ client }) => {
     'browser_tab_select',
     'browser_take_screenshot',
     'browser_wait_for',
+    'get_video_path',
+    'list_video_files',
+    'save_video',
   ]));
 });
 
@@ -55,6 +59,7 @@ test('test vision tool list', async ({ visionClient }) => {
   expect(new Set(visionTools.map(t => t.name))).toEqual(new Set([
     'browser_close',
     'browser_console_messages',
+    'browser_evaluate',
     'browser_file_upload',
     'browser_generate_playwright_test',
     'browser_get_html_content',
@@ -78,6 +83,9 @@ test('test vision tool list', async ({ visionClient }) => {
     'browser_tab_new',
     'browser_tab_select',
     'browser_wait_for',
+    'get_video_path',
+    'list_video_files',
+    'save_video',
   ]));
 });
 

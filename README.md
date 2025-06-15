@@ -37,6 +37,9 @@ This version includes additional tools not available in the original Playwright 
 - **`browser_get_html_content`** - Extract HTML content from pages or specific elements
 - **`browser_get_outer_html`** - Get complete element HTML including the element tag
 - **`browser_element_snapshot`** - Capture accessibility snapshots of specific elements by locator
+- **`get_video_path`** - Get the path to video recordings for browser sessions
+- **`save_video`** - Save video recordings to the output directory with custom filenames
+- **`list_video_files`** - List all video files in the output directory
 
 ### ⚠️ Experimental Notice
 
@@ -699,6 +702,33 @@ X Y coordinate space, based on the provided screenshot.
   - Description: Save page as PDF
   - Parameters:
     - `filename` (string, optional): File name to save the pdf to. Defaults to `page-{timestamp}.pdf` if not specified.
+  - Read-only: **true**
+
+<!-- NOTE: This has been generated via update-readme.ts -->
+
+- **get_video_path**
+  - Title: Get video path
+  - Description: Get the path to the video recording for the current or specified tab. Returns the video file path if recording is enabled.
+  - Parameters:
+    - `tabIndex` (number, optional): Tab index (1-based). If not provided, uses the current tab.
+  - Read-only: **true**
+
+<!-- NOTE: This has been generated via update-readme.ts -->
+
+- **save_video**
+  - Title: Save video
+  - Description: Save the video recording for the current or specified tab to the output directory.
+  - Parameters:
+    - `tabIndex` (number, optional): Tab index (1-based). If not provided, uses the current tab.
+    - `filename` (string, optional): Custom filename for the saved video (without extension). If not provided, uses a default name.
+  - Read-only: **true**
+
+<!-- NOTE: This has been generated via update-readme.ts -->
+
+- **list_video_files**
+  - Title: List video files
+  - Description: List all video files in the output directory.
+  - Parameters: None
   - Read-only: **true**
 
 <!-- NOTE: This has been generated via update-readme.ts -->

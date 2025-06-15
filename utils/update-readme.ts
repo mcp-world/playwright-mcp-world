@@ -36,6 +36,7 @@ import snapshotTools from '../src/tools/snapshot.js';
 import tabsTools from '../src/tools/tabs.js';
 import screenshotTools from '../src/tools/screenshot.js';
 import testTools from '../src/tools/testing.js';
+import videoTools from '../src/tools/video.js';
 import visionTools from '../src/tools/vision.js';
 import waitTools from '../src/tools/wait.js';
 
@@ -55,6 +56,7 @@ const categories = {
   'Resources': [
     ...screenshotTools,
     ...pdfTools,
+    ...videoTools,
     ...networkTools,
     ...consoleTools,
     ...htmlTools,
