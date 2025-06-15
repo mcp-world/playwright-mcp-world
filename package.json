@@ -1,7 +1,7 @@
 {
-  "name": "playwright-mcp-advanced",
+  "name": "@mcp-world/playwright-mcp-world",
   "version": "0.0.31",
-  "description": "Advanced Playwright Tools for MCP",
+  "description": "Community-driven Playwright Tools for MCP with additional features",
   "keywords": [
     "playwright",
     "mcp",
@@ -10,14 +10,14 @@
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/viktor-silakov/playwright-mcp-advanced.git"
+    "url": "git+https://github.com/mcp-world/playwright-mcp-world.git"
   },
-  "homepage": "https://github.com/viktor-silakov/playwright-mcp-advanced",
+  "homepage": "https://github.com/mcp-world/playwright-mcp-world",
   "engines": {
     "node": ">=18"
   },
   "author": {
-    "name": "Viktor Silakov"
+    "name": "MCP World Community"
   },
   "license": "Apache-2.0",
   "scripts": {

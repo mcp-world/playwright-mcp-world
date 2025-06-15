@@ -168,7 +168,7 @@ async function updateOptions(content: string): Promise<string> {
   const endMarker = `<!--- End of options generated section -->`;
   return updateSection(content, startMarker, endMarker, [
     '```',
-    '> npx playwright-mcp-advanced@latest --help',
+    '> npx @mcp-world/playwright-mcp-world@latest --help',
     ...lines,
     '```',
   ]);
