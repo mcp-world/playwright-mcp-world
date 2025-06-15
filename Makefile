@@ -11,6 +11,7 @@ NODE_VERSION := 18
 DOCKER_IMAGE := playwright-mcp
 DOCKER_DEV_IMAGE := playwright-mcp-dev
 TEST_RESULTS_DIR := test-results
+INSTALL_STAMP := node_modules/.install-stamp
 
 ## Help - Show this help message
 help:
@@ -26,8 +27,11 @@ help:
 	@echo "  make dev              # Start development mode"
 
 ## Install - Install Node.js dependencies
-install:
+install: $(INSTALL_STAMP)
+
+$(INSTALL_STAMP): package.json package-lock.json
 	npm ci
+	@touch $(INSTALL_STAMP)
 
 ## Build - Compile TypeScript to JavaScript
 build: install
@@ -39,6 +43,7 @@ clean:
 	rm -rf node_modules/
 	rm -rf $(TEST_RESULTS_DIR)/
 	rm -rf .nyc_output/
+	rm -f $(INSTALL_STAMP)
 	docker rmi $(DOCKER_IMAGE):latest $(DOCKER_DEV_IMAGE):latest 2>/dev/null || true
 
 ## Lint - Run ESLint and TypeScript type checking
