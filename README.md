@@ -90,7 +90,7 @@ First, install the Playwright MCP server with your client.
 ```js
 {
   "mcpServers": {
-    "playwright-advanced": {
+    "playwright": {
       "command": "node",
       "args": [
         "/path/to/playwright-mcp-world/lib/index.js"
