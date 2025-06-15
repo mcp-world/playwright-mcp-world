@@ -27,6 +27,7 @@ import dialogsTools from '../src/tools/dialogs.js';
 import filesTools from '../src/tools/files.js';
 import htmlTools from '../src/tools/html.js';
 import installTools from '../src/tools/install.js';
+import javascriptTools from '../src/tools/javascript.js';
 import keyboardTools from '../src/tools/keyboard.js';
 import navigateTools from '../src/tools/navigate.js';
 import networkTools from '../src/tools/network.js';
@@ -60,6 +61,7 @@ const categories = {
   ],
   'Utilities': [
     ...installTools,
+    ...javascriptTools,
     ...commonTools(true),
   ],
   'Tabs': [
@@ -92,10 +94,10 @@ function formatToolForReadme(tool: ToolSchema<any>): string[] {
   if (tool.advanced?.isEnhanced)
     titleLine += ` ⭐`;
   lines.push(titleLine);
-  
+
   lines.push(`  - Title: ${tool.title}`);
   lines.push(`  - Description: ${tool.description}`);
-  
+
   // Add enhancement note if present
   if (tool.advanced?.enhancementNote)
     lines.push(`  - **Enhancement**: ${tool.advanced.enhancementNote}`);
@@ -184,4 +186,4 @@ async function updateReadme(): Promise<void> {
 
 updateReadme().catch(err => {
   process.exit(1);
-}); 
+});
