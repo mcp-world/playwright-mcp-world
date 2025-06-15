@@ -271,7 +271,10 @@ export class CDPRelayServer extends EventEmitter {
       if (message.id) {
         this._sendToPlaywright({
           id: message.id,
-          error: { message: 'Extension not connected' }
+          error: { 
+            code: -32000,
+            message: 'Extension not connected' 
+          }
         });
       }
     }
