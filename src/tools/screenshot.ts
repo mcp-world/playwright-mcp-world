@@ -22,6 +22,7 @@ import { outputFile } from '../config.js';
 import { generateLocator } from './utils.js';
 
 import type * as playwright from 'playwright';
+import type { ImageContent, TextContent } from '@modelcontextprotocol/sdk/types.js';
 
 const screenshotSchema = z.object({
   raw: z.boolean().optional().describe('Whether to return without compression (in PNG format). Default is false, which returns a JPEG image.'),
@@ -123,7 +124,7 @@ const screenshot = defineTool({
 
         if (elements.length === 0) {
           const screenshot = await tab.page.screenshot(options);
-          const content = [
+          const content: (TextContent | ImageContent)[] = [
             {
               type: 'text' as const,
               text: `No elements found for locator "${params.locator}". Screenshot of full page taken (${screenshot.length} bytes, ${fileType.toUpperCase()})`
@@ -143,7 +144,7 @@ const screenshot = defineTool({
             elements.map(element => element.screenshot(options))
         );
 
-        const content = [
+        const content: (TextContent | ImageContent)[] = [
           {
             type: 'text' as const,
             text: `Screenshot taken of ${screenshots.length} element(s) matching locator "${params.locator}" (${fileType.toUpperCase()})`
@@ -161,7 +162,7 @@ const screenshot = defineTool({
         return { content };
       } else {
         const screenshot = locator ? await locator.screenshot(options) : await tab.page.screenshot(options);
-        const content = [
+        const content: (TextContent | ImageContent)[] = [
           {
             type: 'text' as const,
             text: `Screenshot taken (${screenshot.length} bytes, ${fileType.toUpperCase()})`
