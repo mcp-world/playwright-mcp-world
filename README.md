@@ -1,6 +1,23 @@
-## Advanced Playwright MCP
+# Playwright MCP World
 
-This is an advanced version of the [Playwright MCP](https://github.com/microsoft/playwright-mcp) that provides additional tools for browser automation.
+## A Community-Driven Fork with Enhanced Features
+
+This is a community-maintained fork of the [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) server that includes additional features and improvements requested by the community but not yet included in the original project.
+
+### Why This Fork?
+
+Our goal is to provide a feature-rich Playwright MCP server that includes capabilities the community needs but which may not align with the original project's scope or priorities. As noted in [this discussion](https://github.com/microsoft/playwright-mcp/pull/448#issuecomment-2892276410), some features may be better suited for community-maintained versions.
+
+This fork serves as a testing ground for new features and a way to quickly deliver functionality that users need today.
+
+### Merged Community Contributions
+
+We've integrated features from several community forks:
+
+- **[viktor-silakov/playwright-mcp-advanced](https://github.com/viktor-silakov/playwright-mcp-advanced)** - Enhanced screenshot tools, HTML extraction, and element snapshots
+- **[nnamon/playwright-mcp](https://github.com/nnamon/playwright-mcp)** - JavaScript execution capabilities, Docker support, and improved build tooling
+
+### About Playwright MCP
 
 A Model Context Protocol (MCP) server that provides browser automation capabilities using [Playwright](https://playwright.dev). This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
 
@@ -46,12 +63,12 @@ This advanced version includes additional capabilities not available in the orig
 
 ### Local Development Setup
 
-To use this advanced version locally:
+To use this version locally:
 
 1. **Clone and build the project:**
    ```bash
-   git clone <repository-url>
-   cd playwright-mcp-advanced
+   git clone https://github.com/mcp-world/playwright-mcp-world.git
+   cd playwright-mcp-world
    npm install
    npm run build
    ```
@@ -67,14 +84,14 @@ node utils/generate-links.js
 
 First, install the Playwright MCP server with your client. 
 
-#### For the original Playwright MCP:
+#### Using npm:
 ```js
 {
   "mcpServers": {
     "playwright": {
       "command": "npx",
       "args": [
-        "playwright-mcp-advanced@latest"
+        "@mcp-world/playwright-mcp-world@latest"
       ]
     }
   }
@@ -88,7 +105,7 @@ First, install the Playwright MCP server with your client.
     "playwright-advanced": {
       "command": "node",
       "args": [
-        "/path/to/playwright-mcp-advanced/dist/index.js"
+        "/path/to/playwright-mcp-world/lib/index.js"
       ]
     }
   }
@@ -104,7 +121,7 @@ You can also install the Playwright MCP server using the VS Code CLI:
 
 ```bash
 # For VS Code
-code --add-mcp '{"name":"playwright","command":"npx","args":["playwright-mcp-advanced@latest"]}'
+code --add-mcp '{"name":"playwright","command":"npx","args":["@mcp-world/playwright-mcp-world@latest"]}'
 ```
 
 After installation, the Playwright MCP server will be available for use with your GitHub Copilot agent in VS Code.
@@ -117,7 +134,7 @@ After installation, the Playwright MCP server will be available for use with you
 
 [![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=playwright&config=eyJjb21tYW5kIjoibnB4IEBwbGF5d3JpZ2h0L21jcEBsYXRlc3QifQ%3D%3D)
 
-Or install manually: Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Name to your liking, use `command` type with the command `npx playwright-mcp-advanced`.
+Or install manually: Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Name to your liking, use `command` type with the command `npx @mcp-world/playwright-mcp-world`.
 
 ```js
 {
@@ -125,7 +142,7 @@ Or install manually: Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. N
     "playwright": {
       "command": "npx",
       "args": [
-        "playwright-mcp-advanced@latest"
+        "@mcp-world/playwright-mcp-world@latest"
       ]
     }
   }
@@ -142,7 +159,7 @@ Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Use the following conf
     "playwright-advanced": {
       "command": "node",
       "args": [
-        "/absolute/path/to/playwright-mcp-advanced/dist/index.js"
+        "/absolute/path/to/playwright-mcp-world/lib/index.js"
       ]
     }
   }
@@ -161,7 +178,7 @@ Follow Windsuff MCP [documentation](https://docs.windsurf.com/windsurf/cascade/m
     "playwright": {
       "command": "npx",
       "args": [
-        "playwright-mcp-advanced@latest"
+        "@mcp-world/playwright-mcp-world@latest"
       ]
     }
   }
@@ -181,7 +198,7 @@ Follow the MCP install [guide](https://modelcontextprotocol.io/quickstart/user).
     "playwright": {
       "command": "npx",
       "args": [
-        "playwright-mcp-advanced@latest"
+        "@mcp-world/playwright-mcp-world@latest"
       ]
     }
   }
@@ -195,7 +212,7 @@ Follow the MCP install [guide](https://modelcontextprotocol.io/quickstart/user).
     "playwright-advanced": {
       "command": "node",
       "args": [
-        "/absolute/path/to/playwright-mcp-advanced/dist/index.js"
+        "/absolute/path/to/playwright-mcp-world/lib/index.js"
       ]
     }
   }
@@ -214,7 +231,7 @@ Open [Qodo Gen](https://docs.qodo.ai/qodo-documentation/qodo-gen) chat panel in 
     "playwright": {
       "command": "npx",
       "args": [
-        "playwright-mcp-advanced@latest"
+        "@mcp-world/playwright-mcp-world@latest"
       ]
     }
   }
@@ -231,7 +248,7 @@ Playwright MCP server supports following arguments. They can be provided in the 
 <!--- Options generated by update-readme.ts -->
 
 ```
-> npx playwright-mcp-advanced@latest --help
+> npx @mcp-world/playwright-mcp-world@latest --help
   --allowed-origins <origins>  semicolon-separated list of origins to allow the
                                browser to request. Default is to allow all.
   --blocked-origins <origins>  semicolon-separated list of origins to block the
@@ -316,7 +333,7 @@ state [here](https://playwright.dev/docs/auth).
     "playwright": {
       "command": "npx",
       "args": [
-        "playwright-mcp-advanced@latest",
+        "@mcp-world/playwright-mcp-world@latest",
         "--isolated",
         "--storage-state={path/to/storage.json}"
       ]
@@ -331,7 +348,7 @@ The Playwright MCP server can be configured using a JSON configuration file. You
 using the `--config` command line option:
 
 ```bash
-npx playwright-mcp-advanced@latest --config path/to/config.json
+npx @mcp-world/playwright-mcp-world@latest --config path/to/config.json
 ```
 
 <details>
@@ -420,7 +437,7 @@ When running headed browser on system w/o display or from worker processes of th
 run the MCP server from environment with the DISPLAY and pass the `--port` flag to enable SSE transport.
 
 ```bash
-npx playwright-mcp-advanced@latest --port 8931
+npx @mcp-world/playwright-mcp-world@latest --port 8931
 ```
 
 And then in MCP client config, set the `url` to the SSE endpoint:
@@ -464,7 +481,7 @@ docker build -t playwright-mcp .
 ```js
 import http from 'http';
 
-import { createConnection } from 'playwright-mcp-advanced';
+import { createConnection } from '@mcp-world/playwright-mcp-world';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 
 http.createServer(async (req, res) => {
@@ -496,7 +513,7 @@ To use Vision Mode, add the `--vision` flag when starting the server:
     "playwright": {
       "command": "npx",
       "args": [
-        "playwright-mcp-advanced@latest",
+        "@mcp-world/playwright-mcp-world@latest",
         "--vision"
       ]
     }
@@ -676,6 +693,8 @@ X Y coordinate space, based on the provided screenshot.
     - `locator` (string, optional): Playwright locator string to screenshot a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with element/ref/fullPage parameters.
     - `element` (string, optional): Human-readable element description used to obtain permission to screenshot the element. If not provided, the screenshot will be taken of viewport. If element is provided, ref must be provided too.
     - `ref` (string, optional): Exact target element reference from the page snapshot. If not provided, the screenshot will be taken of viewport. If ref is provided, element must be provided too.
+    - `format` (string, optional): Image format (defaults to png if raw is true, jpeg otherwise)
+    - `quality` (number, optional): JPEG quality (0-100), defaults to 50 for JPEG format
   - Read-only: **true**
 
 <!-- NOTE: This has been generated via update-readme.ts -->
