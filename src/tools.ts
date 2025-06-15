@@ -20,6 +20,7 @@ import dialogs from './tools/dialogs.js';
 import files from './tools/files.js';
 import html from './tools/html.js';
 import install from './tools/install.js';
+import javascript from './tools/javascript.js';
 import keyboard from './tools/keyboard.js';
 import navigate from './tools/navigate.js';
 import network from './tools/network.js';
@@ -40,6 +41,7 @@ export const snapshotTools: Tool<any>[] = [
   ...files(true),
   ...html,
   ...install,
+  ...javascript,
   ...keyboard(true),
   ...navigate(true),
   ...network,
@@ -58,6 +60,7 @@ export const visionTools: Tool<any>[] = [
   ...files(false),
   ...html,
   ...install,
+  ...javascript,
   ...keyboard(false),
   ...navigate(false),
   ...network,

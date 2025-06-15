@@ -30,6 +30,8 @@ const screenshotSchema = z.object({
   locator: z.string().optional().describe('Playwright locator string to screenshot a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with element/ref/fullPage parameters.'),
   element: z.string().optional().describe('Human-readable element description used to obtain permission to screenshot the element. If not provided, the screenshot will be taken of viewport. If element is provided, ref must be provided too.'),
   ref: z.string().optional().describe('Exact target element reference from the page snapshot. If not provided, the screenshot will be taken of viewport. If ref is provided, element must be provided too.'),
+  format: z.enum(['png', 'jpeg']).optional().describe('Image format (defaults to png if raw is true, jpeg otherwise)'),
+  quality: z.number().min(0).max(100).optional().describe('JPEG quality (0-100), defaults to 50 for JPEG format'),
 }).refine(data => {
   return !!data.element === !!data.ref;
 }, {
@@ -64,11 +66,21 @@ const screenshot = defineTool({
   handle: async (context, params) => {
     const tab = context.currentTabOrDie();
     const snapshot = tab.snapshotOrDie();
-    const fileType = params.raw ? 'png' : 'jpeg';
-    const fileName = await outputFile(context.config, params.filename ?? `page-${new Date().toISOString()}.${fileType}`);
+    
+    // Determine file type: use format if provided, otherwise use raw flag
+    const fileType = params.format || (params.raw ? 'png' : 'jpeg');
+    
+    // Generate filename if saving to file
+    const fileName = params.filename ? await outputFile(context.config, params.filename) : 
+                     await outputFile(context.config, `page-${new Date().toISOString()}.${fileType}`);
+    
+    // Set quality for JPEG
+    const quality = fileType === 'jpeg' ? (params.quality || 50) : undefined;
+    
+    // Screenshot options
     const options: playwright.PageScreenshotOptions = {
       type: fileType,
-      quality: fileType === 'png' ? undefined : 50,
+      quality,
       scale: 'css',
       path: fileName,
       fullPage: params.fullPage || false
@@ -111,35 +123,58 @@ const screenshot = defineTool({
 
         if (elements.length === 0) {
           const screenshot = await tab.page.screenshot(options);
-          return {
-            content: includeBase64 ? [{
-              type: 'image' as 'image',
+          const content = [
+            {
+              type: 'text' as const,
+              text: `No elements found for locator "${params.locator}". Screenshot of full page taken (${screenshot.length} bytes, ${fileType.toUpperCase()})`
+            }
+          ];
+          if (includeBase64) {
+            content.push({
+              type: 'image' as const,
               data: screenshot.toString('base64'),
               mimeType: fileType === 'png' ? 'image/png' : 'image/jpeg',
-            }] : []
-          };
+            });
+          }
+          return { content };
         }
 
         const screenshots = await Promise.all(
             elements.map(element => element.screenshot(options))
         );
 
-        return {
-          content: includeBase64 ? screenshots.map(screenshot => ({
-            type: 'image' as 'image',
-            data: screenshot.toString('base64'),
-            mimeType: fileType === 'png' ? 'image/png' : 'image/jpeg',
-          })) : []
-        };
+        const content = [
+          {
+            type: 'text' as const,
+            text: `Screenshot taken of ${screenshots.length} element(s) matching locator "${params.locator}" (${fileType.toUpperCase()})`
+          }
+        ];
+        if (includeBase64) {
+          screenshots.forEach(screenshot => {
+            content.push({
+              type: 'image' as const,
+              data: screenshot.toString('base64'),
+              mimeType: fileType === 'png' ? 'image/png' : 'image/jpeg',
+            });
+          });
+        }
+        return { content };
       } else {
         const screenshot = locator ? await locator.screenshot(options) : await tab.page.screenshot(options);
-        return {
-          content: includeBase64 ? [{
-            type: 'image' as 'image',
+        const content = [
+          {
+            type: 'text' as const,
+            text: `Screenshot taken (${screenshot.length} bytes, ${fileType.toUpperCase()})`
+          }
+        ];
+        if (includeBase64) {
+          content.push({
+            type: 'image' as const,
             data: screenshot.toString('base64'),
             mimeType: fileType === 'png' ? 'image/png' : 'image/jpeg',
-          }] : []
-        };
+          });
+        }
+        return { content };
       }
     };
 
