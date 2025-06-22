@@ -1,6 +1,6 @@
 {
   "name": "@mcp-world/playwright-mcp-world",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "Community-driven Playwright Tools for MCP with additional features",
   "keywords": [
     "playwright",
