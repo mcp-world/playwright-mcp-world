@@ -19,7 +19,9 @@
 import net from 'net';
 
 import { program } from 'commander';
+import { addExtra } from 'playwright-extra';
 import playwright from 'playwright';
+import stealth from 'puppeteer-extra-plugin-stealth';
 
 import { HttpServer } from './httpServer.js';
 import { packageJSON } from './package.js';
@@ -90,7 +92,8 @@ class BrowserServer {
       contextOptions: request.contextOptions,
     };
 
-    const browserType = playwright[request.browserType as 'chromium' | 'firefox' | 'webkit'];
+    const browserType = addExtra(playwright[request.browserType as 'chromium' | 'firefox' | 'webkit']);
+    browserType.use(stealth());
     const { browser, error } = await browserType.launchPersistentContext(request.userDataDir, {
       ...request.launchOptions,
       ...request.contextOptions,

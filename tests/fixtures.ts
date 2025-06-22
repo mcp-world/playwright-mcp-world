@@ -18,7 +18,9 @@ import fs from 'fs';
 import url from 'url';
 import path from 'path';
 import net from 'net';
+import { addExtra } from 'playwright-extra';
 import { chromium } from 'playwright';
+import stealth from 'puppeteer-extra-plugin-stealth';
 import { fork } from 'child_process';
 
 import { test as baseTest, expect as baseExpect } from '@playwright/test';
@@ -113,7 +115,9 @@ export const test = baseTest.extend<TestFixtures & TestOptions, WorkerFixtures>(
   },
 
   wsEndpoint: async ({ }, use) => {
-    const browserServer = await chromium.launchServer();
+    const enhancedChromium = addExtra(chromium);
+    enhancedChromium.use(stealth());
+    const browserServer = await enhancedChromium.launchServer();
     await use(browserServer.wsEndpoint());
     await browserServer.close();
   },
@@ -126,7 +130,9 @@ export const test = baseTest.extend<TestFixtures & TestOptions, WorkerFixtures>(
     await use({
       endpoint: `http://localhost:${port}`,
       start: async () => {
-        browserContext = await chromium.launchPersistentContext(testInfo.outputPath('cdp-user-data-dir'), {
+        const enhancedChromium = addExtra(chromium);
+        enhancedChromium.use(stealth());
+        browserContext = await enhancedChromium.launchPersistentContext(testInfo.outputPath('cdp-user-data-dir'), {
           channel: mcpBrowser,
           headless: true,
           args: [
@@ -154,7 +160,9 @@ export const test = baseTest.extend<TestFixtures & TestOptions, WorkerFixtures>(
         throw new Error('Must be running in MCP extension mode to use this fixture.');
       const cdpPort = await findFreePort();
       const pathToExtension = path.join(url.fileURLToPath(import.meta.url), '../../extension');
-      context = await chromium.launchPersistentContext('', {
+      const enhancedChromium = addExtra(chromium);
+      enhancedChromium.use(stealth());
+      context = await enhancedChromium.launchPersistentContext('', {
         headless: mcpHeadless,
         args: [
           `--disable-extensions-except=${pathToExtension}`,

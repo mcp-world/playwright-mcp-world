@@ -20,7 +20,9 @@ import path from 'node:path';
 import os from 'node:os';
 
 import debug from 'debug';
+import { addExtra } from 'playwright-extra';
 import * as playwright from 'playwright';
+import stealth from 'puppeteer-extra-plugin-stealth';
 import { userDataDir } from './fileUtils.js';
 
 import type { FullConfig } from './config.js';
@@ -107,7 +109,8 @@ class IsolatedContextFactory extends BaseContextFactory {
 
   protected override async _doObtainBrowser(): Promise<playwright.Browser> {
     await injectCdpPort(this.browserConfig);
-    const browserType = playwright[this.browserConfig.browserName];
+    const browserType = addExtra(playwright[this.browserConfig.browserName]);
+    browserType.use(stealth());
     return browserType.launch({
       ...this.browserConfig.launchOptions,
       handleSIGINT: false,
@@ -158,7 +161,9 @@ class RemoteContextFactory extends BaseContextFactory {
     url.searchParams.set('browser', this.browserConfig.browserName);
     if (this.browserConfig.launchOptions)
       url.searchParams.set('launch-options', JSON.stringify(this.browserConfig.launchOptions));
-    return playwright[this.browserConfig.browserName].connect(String(url));
+    const browserType = addExtra(playwright[this.browserConfig.browserName]);
+    browserType.use(stealth());
+    return browserType.connect(String(url));
   }
 
   protected override async _doCreateContext(browser: playwright.Browser): Promise<playwright.BrowserContext> {
@@ -182,7 +187,8 @@ class PersistentContextFactory implements BrowserContextFactory {
     this._userDataDirs.add(userDataDir);
     testDebug('lock user data dir', userDataDir);
 
-    const browserType = playwright[this.browserConfig.browserName];
+    const browserType = addExtra(playwright[this.browserConfig.browserName]);
+    browserType.use(stealth());
     for (let i = 0; i < 5; i++) {
       try {
         const contextOptions = {
