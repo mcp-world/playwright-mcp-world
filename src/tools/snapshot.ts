@@ -26,17 +26,20 @@ const snapshot = defineTool({
     name: 'browser_snapshot',
     title: 'Page snapshot',
     description: 'Capture accessibility snapshot of the current page, this is better than screenshot',
-    inputSchema: z.object({}),
+    inputSchema: z.object({
+      truncateSnapshot: z.boolean().optional().describe('Whether to truncate large snapshots at 20000 tokens. Defaults to true.'),
+    }),
     type: 'readOnly',
   },
 
-  handle: async context => {
+  handle: async (context, params) => {
     await context.ensureTab();
 
     return {
       code: [`// <internal code to capture accessibility snapshot>`],
       captureSnapshot: true,
       waitForNetwork: false,
+      truncateSnapshot: params.truncateSnapshot ?? true,
     };
   },
 });

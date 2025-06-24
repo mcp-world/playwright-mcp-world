@@ -58,6 +58,7 @@ export type ToolResult = {
   captureSnapshot: boolean;
   waitForNetwork: boolean;
   resultOverride?: ToolActionResult;
+  truncateSnapshot?: boolean;
 };
 
 export type Tool<Input extends InputType = InputType> = {
