@@ -28,6 +28,7 @@ const snapshot = defineTool({
     description: 'Capture accessibility snapshot of the current page, this is better than screenshot',
     inputSchema: z.object({
       truncateSnapshot: z.boolean().optional().describe('Whether to truncate large snapshots at 20000 tokens. Defaults to true.'),
+      page: z.number().min(1).optional().describe('Page number to retrieve when snapshot is truncated. Defaults to 1.'),
     }),
     type: 'readOnly',
   },
@@ -40,6 +41,7 @@ const snapshot = defineTool({
       captureSnapshot: true,
       waitForNetwork: false,
       truncateSnapshot: params.truncateSnapshot ?? true,
+      snapshotPage: params.page ?? 1,
     };
   },
 });

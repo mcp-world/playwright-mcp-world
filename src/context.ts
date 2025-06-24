@@ -135,7 +135,7 @@ export class Context {
   async run(tool: Tool, params: Record<string, unknown> | undefined) {
     // Tab management is done outside of the action() call.
     const toolResult = await tool.handle(this, tool.schema.inputSchema.parse(params || {}));
-    const { code, action, waitForNetwork, captureSnapshot, resultOverride, truncateSnapshot } = toolResult;
+    const { code, action, waitForNetwork, captureSnapshot, resultOverride, truncateSnapshot, snapshotPage } = toolResult;
     const racingAction = action ? () => this._raceAgainstModalDialogs(action) : undefined;
 
     if (resultOverride)
@@ -206,7 +206,8 @@ ${code.join('\n')}
       // Use truncation if enabled (default true)
       const shouldTruncate = truncateSnapshot !== false;
       if (shouldTruncate) {
-        const truncatedResult = tab.snapshotOrDie().truncatedText(20000);
+        const pageNumber = snapshotPage ?? 1;
+        const truncatedResult = tab.snapshotOrDie().truncatedText(20000, pageNumber);
         result.push(truncatedResult.text);
       } else {
         result.push(tab.snapshotOrDie().text());

@@ -40,78 +40,167 @@ export class PageSnapshot {
     return this._text;
   }
 
-  truncatedText(maxTokens: number = 20000): { text: string; isTruncated: boolean; remainingElements: number } {
+  truncatedText(maxTokens: number = 20000, pageNumber: number = 1): { text: string; isTruncated: boolean; currentPage: number; totalPages: number } {
     // Using the approximation of 0.75 tokens per word
     const wordsPerToken = 1 / 0.75;
-    const maxWords = Math.floor(maxTokens * wordsPerToken);
+    const maxWordsPerPage = Math.floor(maxTokens * wordsPerToken);
     
     // Split the raw snapshot into lines
     const lines = this._rawSnapshot.split('\n');
-    const truncatedLines: string[] = [];
-    let currentWordCount = 0;
-    let isTruncated = false;
-    let lastCompleteElementIndex = -1;
     
-    // Track element depth to avoid breaking elements
-    let currentIndentLevel = 0;
+    // First pass: identify all element boundaries
+    const elementBoundaries: number[] = [];
+    let inElement = false;
+    let elementStartLine = 0;
     
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const lineWords = line.split(/\s+/).filter(w => w.length > 0).length;
-      
-      // Calculate indent level (2 spaces per level in YAML)
       const leadingSpaces = line.match(/^(\s*)/)?.[1]?.length || 0;
-      const indentLevel = Math.floor(leadingSpaces / 2);
+      const trimmedLine = line.trim();
       
-      // If we're about to exceed the limit
-      if (currentWordCount + lineWords > maxWords && truncatedLines.length > 0) {
-        // Only break at root level elements (indent level 0)
-        if (indentLevel === 0) {
-          isTruncated = true;
-          lastCompleteElementIndex = i;
-          break;
-        }
+      // Detect element start (any line that starts a new structure)
+      if (trimmedLine && !inElement) {
+        inElement = true;
+        elementStartLine = i;
       }
       
-      truncatedLines.push(line);
-      currentWordCount += lineWords;
-      currentIndentLevel = indentLevel;
+      // Detect element end (empty line or next element at same/lower indent level)
+      if (i < lines.length - 1) {
+        const nextLine = lines[i + 1];
+        const nextLeadingSpaces = nextLine.match(/^(\s*)/)?.[1]?.length || 0;
+        const nextTrimmed = nextLine.trim();
+        
+        if (!trimmedLine || (nextTrimmed && nextLeadingSpaces <= leadingSpaces && trimmedLine.startsWith('-'))) {
+          if (inElement) {
+            elementBoundaries.push(elementStartLine);
+            elementBoundaries.push(i + 1);
+            inElement = false;
+          }
+        }
+      }
     }
     
-    // Count remaining elements at root level
-    let remainingElements = 0;
-    if (isTruncated) {
-      for (let i = lastCompleteElementIndex; i < lines.length; i++) {
+    // Handle last element
+    if (inElement) {
+      elementBoundaries.push(elementStartLine);
+      elementBoundaries.push(lines.length);
+    }
+    
+    // Second pass: create pages based on element boundaries
+    const pages: { startLine: number; endLine: number; startElement: number; endElement: number }[] = [];
+    let currentPageStart = 0;
+    let currentWordCount = 0;
+    let currentElementIndex = 0;
+    
+    for (let i = 0; i < elementBoundaries.length; i += 2) {
+      const elementStart = elementBoundaries[i];
+      const elementEnd = elementBoundaries[i + 1];
+      
+      // Calculate words in this element
+      let elementWordCount = 0;
+      for (let j = elementStart; j < elementEnd; j++) {
+        elementWordCount += lines[j].split(/\s+/).filter(w => w.length > 0).length;
+      }
+      
+      // If adding this element would exceed page limit and we have content
+      if (currentWordCount + elementWordCount > maxWordsPerPage && currentWordCount > 0) {
+        // End current page
+        pages.push({
+          startLine: currentPageStart,
+          endLine: elementStart,
+          startElement: Math.floor(currentElementIndex / 2),
+          endElement: Math.floor(i / 2)
+        });
+        
+        // Start new page
+        currentPageStart = elementStart;
+        currentWordCount = elementWordCount;
+        currentElementIndex = i;
+      } else {
+        currentWordCount += elementWordCount;
+      }
+    }
+    
+    // Add final page
+    if (currentWordCount > 0) {
+      pages.push({
+        startLine: currentPageStart,
+        endLine: lines.length,
+        startElement: Math.floor(currentElementIndex / 2),
+        endElement: Math.floor(elementBoundaries.length / 2)
+      });
+    }
+    
+    // Get the requested page
+    const totalPages = pages.length || 1;
+    const actualPage = Math.min(Math.max(1, pageNumber), totalPages);
+    const pageInfo = pages[actualPage - 1];
+    
+    if (!pageInfo) {
+      // Empty snapshot
+      return {
+        text: [
+          `- Page Snapshot (Page 1 of 1)`,
+          '```yaml',
+          '',
+          '```'
+        ].join('\n'),
+        isTruncated: false,
+        currentPage: 1,
+        totalPages: 1
+      };
+    }
+    
+    // Extract lines for current page
+    const pageLines = lines.slice(pageInfo.startLine, pageInfo.endLine);
+    
+    // Preserve indentation context if not starting from beginning
+    let contextPrefix = '';
+    if (pageInfo.startLine > 0) {
+      // Find the parent context by looking backwards
+      let parentIndent = -1;
+      const firstLineIndent = lines[pageInfo.startLine].match(/^(\s*)/)?.[1]?.length || 0;
+      
+      for (let i = pageInfo.startLine - 1; i >= 0; i--) {
         const line = lines[i];
-        const leadingSpaces = line.match(/^(\s*)/)?.[1]?.length || 0;
-        const indentLevel = Math.floor(leadingSpaces / 2);
-        if (indentLevel === 0 && line.trim().startsWith('-')) {
-          remainingElements++;
+        const indent = line.match(/^(\s*)/)?.[1]?.length || 0;
+        const trimmed = line.trim();
+        
+        if (trimmed && indent < firstLineIndent) {
+          contextPrefix = '# Context from previous page:\n# ' + line + '\n# ...\n\n';
+          break;
         }
       }
     }
     
     // Build the final text
-    let finalText = [
-      `- Page Snapshot`,
+    const finalText = [
+      `- Page Snapshot (Page ${actualPage} of ${totalPages})`,
       '```yaml',
-      truncatedLines.join('\n'),
     ];
     
-    if (isTruncated) {
+    if (contextPrefix) {
+      finalText.push(contextPrefix);
+    }
+    
+    finalText.push(pageLines.join('\n'));
+    
+    if (actualPage < totalPages) {
       finalText.push('');
-      finalText.push('# SNAPSHOT TRUNCATED');
-      finalText.push(`# This snapshot was truncated at ${maxTokens} tokens (~${truncatedLines.length} lines)`);
-      finalText.push(`# ${remainingElements} more root elements are available`);
-      finalText.push('# To load the next part, use browser_snapshot with truncateSnapshot: false');
+      finalText.push('# MORE CONTENT AVAILABLE');
+      finalText.push(`# This is page ${actualPage} of ${totalPages}`);
+      finalText.push(`# ${pageInfo.endElement - pageInfo.startElement} elements shown on this page`);
+      finalText.push(`# ${(Math.floor(elementBoundaries.length / 2)) - pageInfo.endElement} more elements on remaining pages`);
+      finalText.push(`# To load the next page, use browser_snapshot with page: ${actualPage + 1}`);
     }
     
     finalText.push('```');
     
     return {
       text: finalText.join('\n'),
-      isTruncated,
-      remainingElements
+      isTruncated: actualPage < totalPages,
+      currentPage: actualPage,
+      totalPages
     };
   }
 
