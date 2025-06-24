@@ -693,6 +693,7 @@ X Y coordinate space, based on the provided screenshot.
     - `ref` (string, optional): Exact target element reference from the page snapshot. If not provided, the screenshot will be taken of viewport. If ref is provided, element must be provided too.
     - `format` (string, optional): Image format (defaults to png if raw is true, jpeg otherwise)
     - `quality` (number, optional): JPEG quality (0-100), defaults to 50 for JPEG format
+    - `captureSnapshot` (boolean, optional): Whether to capture a page snapshot after taking the screenshot. Defaults to false.
   - Read-only: **true**
 
 <!-- NOTE: This has been generated via update-readme.ts -->
