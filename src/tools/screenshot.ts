@@ -33,7 +33,7 @@ const screenshotSchema = z.object({
   ref: z.string().optional().describe('Exact target element reference from the page snapshot. If not provided, the screenshot will be taken of viewport. If ref is provided, element must be provided too.'),
   format: z.enum(['png', 'jpeg']).optional().describe('Image format (defaults to png if raw is true, jpeg otherwise)'),
   quality: z.number().min(0).max(100).optional().describe('JPEG quality (0-100), defaults to 50 for JPEG format'),
-  captureSnapshot: z.boolean().optional().describe('Whether to capture a page snapshot after taking the screenshot. Defaults to true.'),
+  captureSnapshot: z.boolean().optional().describe('Whether to capture a page snapshot after taking the screenshot. Defaults to false.'),
 }).refine(data => {
   return !!data.element === !!data.ref;
 }, {
@@ -183,7 +183,7 @@ const screenshot = defineTool({
     return {
       code,
       action,
-      captureSnapshot: params.captureSnapshot ?? true,
+      captureSnapshot: params.captureSnapshot ?? false,
       waitForNetwork: false,
     };
   }
