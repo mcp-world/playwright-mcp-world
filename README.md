@@ -534,7 +534,9 @@ X Y coordinate space, based on the provided screenshot.
 - **browser_snapshot**
   - Title: Page snapshot
   - Description: Capture accessibility snapshot of the current page, this is better than screenshot
-  - Parameters: None
+  - Parameters:
+    - `truncateSnapshot` (boolean, optional): Whether to truncate large snapshots at 20000 tokens. Defaults to true.
+    - `page` (number, optional): Page number to retrieve when snapshot is truncated. Defaults to 1.
   - Read-only: **true**
 
 <!-- NOTE: This has been generated via update-readme.ts -->
