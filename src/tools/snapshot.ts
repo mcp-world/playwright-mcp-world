@@ -34,16 +34,13 @@ const snapshot = defineTool({
   },
 
   handle: async (context, params, response) => {
-    const tab = await context.ensureTab();
-    response.addCode(`// <internal code to capture accessibility snapshot>`);
+    await context.ensureTab();
     response.setIncludeSnapshot();
     
     // Handle truncation and pagination if our custom params are provided
     if (params.truncateSnapshot === false || params.page !== undefined) {
       // TODO: Implement custom truncation logic if needed
     }
-    
-    await tab.run(async () => {}, response);
   },
 });
 
@@ -83,7 +80,7 @@ const elementSnapshot = defineTool({
         response.addCode(`const snapshot_${index} = await page.locator('${loc}').textContent();`);
       });
 
-      await tab.run(async () => {
+      await tab.waitForCompletion(async () => {
         const snapshots = await Promise.all(
           params.locators!.map(async (loc, index) => {
             try {
@@ -117,13 +114,13 @@ const elementSnapshot = defineTool({
           })
         );
         response.addResult(snapshots.join('\n\n'));
-      }, response);
+      });
     } else if (isSingleLocator) {
       response.addCode(`// Capture accessibility snapshot of element(s) by locator: ${params.locator}`);
       response.addCode(`const elements = await page.locator('${params.locator}').all();`);
       response.addCode(`const snapshots = await Promise.all(elements.map(async el => ({ text: await el.textContent(), tag: await el.evaluate(e => e.tagName.toLowerCase()), attrs: await el.evaluate(e => Array.from(e.attributes).reduce((acc, attr) => ({ ...acc, [attr.name]: attr.value }), {})) })));`);
 
-      await tab.run(async () => {
+      await tab.waitForCompletion(async () => {
         try {
           const locator = tab.page.locator(params.locator!);
           const elements = await locator.all();
@@ -168,7 +165,7 @@ const elementSnapshot = defineTool({
         } catch (error) {
           response.addResult(`### Element Snapshot (${params.locator}):\nError: ${(error as Error).message}`);
         }
-      }, response);
+      });
     }
   }
 });
@@ -208,12 +205,12 @@ const click = defineTabTool({
       response.addCode(`await page.${await generateLocator(locator)}.click(${buttonAttr});`);
     }
 
-    await tab.run(async () => {
+    await tab.waitForCompletion(async () => {
       if (params.doubleClick)
         await locator.dblclick({ button });
       else
         await locator.click({ button });
-    }, response);
+    });
   },
 });
 
@@ -240,9 +237,9 @@ const drag = defineTabTool({
       { ref: params.endRef, element: params.endElement },
     ]);
 
-    await tab.run(async () => {
+    await tab.waitForCompletion(async () => {
       await startLocator.dragTo(endLocator);
-    }, response);
+    });
 
     response.addCode(`await page.${await generateLocator(startLocator)}.dragTo(page.${await generateLocator(endLocator)});`);
   },
@@ -264,9 +261,9 @@ const hover = defineTabTool({
     const locator = await tab.refLocator(params);
     response.addCode(`await page.${await generateLocator(locator)}.hover();`);
 
-    await tab.run(async () => {
+    await tab.waitForCompletion(async () => {
       await locator.hover();
-    }, response);
+    });
   },
 });
 
@@ -291,9 +288,9 @@ const selectOption = defineTabTool({
     response.addCode(`// Select options [${params.values.join(', ')}] in ${params.element}`);
     response.addCode(`await page.${await generateLocator(locator)}.selectOption(${javascript.formatObject(params.values)});`);
 
-    await tab.run(async () => {
+    await tab.waitForCompletion(async () => {
       await locator.selectOption(params.values);
-    }, response);
+    });
   },
 });
 
