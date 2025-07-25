@@ -78,9 +78,12 @@ test.describe('truncateSnapshot', () => {
     expect(textContent).toContain('To load the next page, use browser_snapshot with page: 2');
   });
 
-  test('should not truncate when truncateSnapshot is false', async ({ client, server }) => {
+  test('should not truncate when truncateSnapshot is 0', async ({ startClient, server }) => {
     // Set up the test page content with 30,000 words
-    // Even with truncateSnapshot: false, we should get all content
+    // With truncateSnapshot: 0, we should get all content
+    const { client } = await startClient({
+      config: { truncateSnapshot: 0 }
+    });
     const wordsPerParagraph = 100;
     const paragraphsPerSection = 10;
     const sections = 30; // 30,000 words total
@@ -111,10 +114,10 @@ test.describe('truncateSnapshot', () => {
       arguments: { url: `${server.PREFIX}snapshot-truncation-2.html` },
     });
 
-    // Take snapshot with truncateSnapshot: false
+    // Take snapshot (truncation disabled via config)
     const result = await client.callTool({
       name: 'browser_snapshot',
-      arguments: { truncateSnapshot: false },
+      arguments: {},
     });
 
     // Check that result does not contain truncation indicators
@@ -160,7 +163,7 @@ test.describe('truncateSnapshot', () => {
     // Take snapshot of page 2
     const result = await client.callTool({
       name: 'browser_snapshot',
-      arguments: { truncateSnapshot: true, page: 2 },
+      arguments: { page: 2 },
     });
 
     // Check that result shows page 2
@@ -205,7 +208,7 @@ test.describe('truncateSnapshot', () => {
     // Take snapshot of a very high page number
     const result = await client.callTool({
       name: 'browser_snapshot',
-      arguments: { truncateSnapshot: true, page: 999 },
+      arguments: { page: 999 },
     });
 
     // Should show the last available page

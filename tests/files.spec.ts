@@ -96,7 +96,10 @@ Error: The tool "browser_file_upload" can only be used when there is related mod
 
 test('clicking on download link emits download', async ({ startClient, server, mcpMode }, testInfo) => {
   const { client } = await startClient({
-    config: { outputDir: testInfo.outputPath('output') },
+    config: { 
+      outputDir: testInfo.outputPath('output'),
+      truncateSnapshot: 0  // Disable truncation for this test
+    },
   });
 
   server.setContent('/', `<a href="/download" download="test.txt">Download</a>`, 'text/html');
@@ -113,13 +116,16 @@ test('clicking on download link emits download', async ({ startClient, server, m
       ref: 'e2',
     },
   });
-  await expect.poll(() => client.callTool({ name: 'browser_snapshot', arguments: { truncateSnapshot: false } })).toContainTextContent(`### Downloads
+  await expect.poll(() => client.callTool({ name: 'browser_snapshot' })).toContainTextContent(`### Downloads
 - Downloaded file test.txt to ${testInfo.outputPath('output', 'test.txt')}`);
 });
 
 test('navigating to download link emits download', async ({ startClient, server, mcpBrowser, mcpMode }, testInfo) => {
   const { client } = await startClient({
-    config: { outputDir: testInfo.outputPath('output') },
+    config: { 
+      outputDir: testInfo.outputPath('output'),
+      truncateSnapshot: 0  // Disable truncation for this test
+    },
   });
 
   test.skip(mcpBrowser !== 'chromium', 'This test is racy');
@@ -139,7 +145,7 @@ test('navigating to download link emits download', async ({ startClient, server,
   });
   // Check if Downloads section is in the response or in a subsequent snapshot
   if (!response.content.some((c: any) => c.text?.includes('### Downloads'))) {
-    await expect.poll(() => client.callTool({ name: 'browser_snapshot', arguments: { truncateSnapshot: false } })).toContainTextContent('### Downloads');
+    await expect.poll(() => client.callTool({ name: 'browser_snapshot' })).toContainTextContent('### Downloads');
   } else {
     expect(response).toContainTextContent('### Downloads');
   }
