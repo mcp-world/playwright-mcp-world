@@ -135,7 +135,7 @@ export function configFromCLIOptions(cliOptions: CLIOptions): Config {
   };
 
   // --no-sandbox was passed, disable the sandbox
-  if (!cliOptions.sandbox)
+  if (cliOptions.sandbox === false)
     launchOptions.chromiumSandbox = false;
 
   if (cliOptions.proxyServer) {
