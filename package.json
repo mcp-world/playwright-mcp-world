@@ -22,8 +22,11 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc",
+    "build:extension": "tsc --project extension",
     "lint": "npm run update-readme && eslint . && tsc --noEmit",
-    "update-readme": "tsx utils/update-readme.ts && git add README.md && git diff --staged --quiet README.md || git commit -m \"Update README documentation automatically\"",
+    "update-readme": "node utils/update-readme.js",
+    "watch": "tsc --watch",
+    "watch:extension": "tsc --watch --project extension",
     "test": "playwright test --workers=5",
     "ctest": "playwright test --project=chrome",
     "ftest": "playwright test --project=firefox",
