@@ -24,7 +24,6 @@ import { execSync } from 'node:child_process';
 
 import { allTools } from '../lib/tools.js';
 import htmlTools from '../lib/tools/html.js';
-import javascriptTools from '../lib/tools/javascript.js';
 import videoTools from '../lib/tools/video.js';
 
 const capabilities = {
@@ -39,7 +38,6 @@ const capabilities = {
 const extendedAllTools = [
   ...allTools,
   ...htmlTools.filter(tool => !allTools.some(t => t.schema.name === tool.schema.name)),
-  ...javascriptTools.filter(tool => !allTools.some(t => t.schema.name === tool.schema.name)),
   ...videoTools.filter(tool => !allTools.some(t => t.schema.name === tool.schema.name)),
 ];
 
