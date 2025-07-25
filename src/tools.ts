@@ -28,7 +28,6 @@ import pdf from './tools/pdf.js';
 import snapshot from './tools/snapshot.js';
 import tabs from './tools/tabs.js';
 import screenshot from './tools/screenshot.js';
-import testing from './tools/testing.js';
 import video from './tools/video.js';
 import vision from './tools/vision.js';
 import wait from './tools/wait.js';
@@ -50,7 +49,6 @@ export const snapshotTools: Tool<any>[] = [
   ...screenshot,
   ...snapshot,
   ...tabs(true),
-  ...testing,
   ...video,
   ...wait(true),
 ];
@@ -68,7 +66,6 @@ export const visionTools: Tool<any>[] = [
   ...network,
   ...pdf,
   ...tabs(false),
-  ...testing,
   ...video,
   ...vision,
   ...wait(false),

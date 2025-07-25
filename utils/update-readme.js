@@ -35,7 +35,6 @@ import pdfTools from '../lib/tools/pdf.js';
 import snapshotTools from '../lib/tools/snapshot.js';
 import tabsTools from '../lib/tools/tabs.js';
 import screenshotTools from '../lib/tools/screenshot.js';
-import testTools from '../lib/tools/testing.js';
 import videoTools from '../lib/tools/video.js';
 import visionTools from '../lib/tools/vision.js';
 import waitTools from '../lib/tools/wait.js';
@@ -67,9 +66,6 @@ const categories = {
   ],
   'Tabs': [
     ...tabsTools(true),
-  ],
-  'Testing': [
-    ...testTools,
   ],
   'Vision mode': [
     ...visionTools,
