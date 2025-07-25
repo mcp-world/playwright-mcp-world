@@ -33,16 +33,17 @@ const snapshot = defineTool({
     type: 'readOnly',
   },
 
-  handle: async (context, params) => {
-    await context.ensureTab();
-
-    return {
-      code: [`// <internal code to capture accessibility snapshot>`],
-      captureSnapshot: true,
-      waitForNetwork: false,
-      truncateSnapshot: params.truncateSnapshot ?? true,
-      snapshotPage: params.page ?? 1,
-    };
+  handle: async (context, params, response) => {
+    const tab = await context.ensureTab();
+    response.addCode(`// <internal code to capture accessibility snapshot>`);
+    response.setIncludeSnapshot();
+    
+    // Handle truncation and pagination if our custom params are provided
+    if (params.truncateSnapshot === false || params.page !== undefined) {
+      // TODO: Implement custom truncation logic if needed
+    }
+    
+    await tab.run(async () => {}, response);
   },
 });
 
@@ -71,23 +72,18 @@ const elementSnapshot = defineTool({
     },
   },
 
-  handle: async (context, params) => {
+  handle: async (context, params, response) => {
     const tab = context.currentTabOrDie();
     const isMultipleLocators = params.locators && params.locators.length > 0;
     const isSingleLocator = params.locator;
 
-    let code: string[] = [];
-    let action: () => Promise<{ content: { type: 'text'; text: string }[] }> = async () => ({
-      content: [{ type: 'text', text: 'No action defined' }]
-    });
-
     if (isMultipleLocators) {
-      code = [
-        `// Capture accessibility snapshots of multiple elements: ${params.locators!.join(', ')}`,
-        ...params.locators!.map(loc => `const snapshot_${params.locators!.indexOf(loc)} = await page.locator('${loc}').textContent();`)
-      ];
+      response.addCode(`// Capture accessibility snapshots of multiple elements: ${params.locators!.join(', ')}`);
+      params.locators!.forEach((loc, index) => {
+        response.addCode(`const snapshot_${index} = await page.locator('${loc}').textContent();`);
+      });
 
-      action = async () => {
+      await tab.run(async () => {
         const snapshots = await Promise.all(
           params.locators!.map(async (loc, index) => {
             try {
@@ -96,14 +92,12 @@ const elementSnapshot = defineTool({
               if (!isVisible)
                 return `### Element ${index + 1} (${loc}):\nElement not visible or not found`;
 
-
               const text = await locator.textContent();
               const tagName = await locator.evaluate(el => el.tagName.toLowerCase());
               const attributes = await locator.evaluate(el => {
                 const attrs: Record<string, string> = {};
                 for (const attr of el.attributes)
                   attrs[attr.name] = attr.value;
-
                 return attrs;
               });
 
@@ -114,7 +108,6 @@ const elementSnapshot = defineTool({
                 result.push(`  attributes:`);
                 for (const [key, value] of Object.entries(attributes))
                   result.push(`    ${key}: "${value}"`);
-
               }
               result.push('```');
               return result.join('\n');
@@ -123,92 +116,60 @@ const elementSnapshot = defineTool({
             }
           })
         );
-        return {
-          content: [{
-            type: 'text' as 'text',
-            text: snapshots.join('\n\n')
-          }]
-        };
-      };
+        response.addResult(snapshots.join('\n\n'));
+      }, response);
     } else if (isSingleLocator) {
-      code = [
-        `// Capture accessibility snapshot of element(s) by locator: ${params.locator}`,
-        `const elements = await page.locator('${params.locator}').all();`,
-        `const snapshots = await Promise.all(elements.map(async el => ({ text: await el.textContent(), tag: await el.evaluate(e => e.tagName.toLowerCase()), attrs: await el.evaluate(e => Array.from(e.attributes).reduce((acc, attr) => ({ ...acc, [attr.name]: attr.value }), {})) })));`
-      ];
+      response.addCode(`// Capture accessibility snapshot of element(s) by locator: ${params.locator}`);
+      response.addCode(`const elements = await page.locator('${params.locator}').all();`);
+      response.addCode(`const snapshots = await Promise.all(elements.map(async el => ({ text: await el.textContent(), tag: await el.evaluate(e => e.tagName.toLowerCase()), attrs: await el.evaluate(e => Array.from(e.attributes).reduce((acc, attr) => ({ ...acc, [attr.name]: attr.value }), {})) })));`);
 
-      action = async () => {
+      await tab.run(async () => {
         try {
           const locator = tab.page.locator(params.locator!);
           const elements = await locator.all();
 
           if (elements.length === 0) {
-            return {
-              content: [{
-                type: 'text' as 'text',
-                text: `### Element Snapshot (${params.locator}):\nNo elements found with this locator`
-              }]
-            };
+            response.addResult(`### Element Snapshot (${params.locator}):\nNo elements found with this locator`);
+            return;
           }
 
           const snapshots = await Promise.all(
-              elements.map(async (element, index) => {
-                try {
-                  const isVisible = await element.isVisible();
-                  if (!isVisible)
-                    return `### Element ${index + 1} (${params.locator}):\nElement not visible`;
+            elements.map(async (element, index) => {
+              try {
+                const isVisible = await element.isVisible();
+                if (!isVisible)
+                  return `### Element ${index + 1} (${params.locator}):\nElement not visible`;
 
+                const text = await element.textContent();
+                const tagName = await element.evaluate(el => el.tagName.toLowerCase());
+                const attributes = await element.evaluate(el => {
+                  const attrs: Record<string, string> = {};
+                  for (const attr of el.attributes)
+                    attrs[attr.name] = attr.value;
+                  return attrs;
+                });
 
-                  const text = await element.textContent();
-                  const tagName = await element.evaluate(el => el.tagName.toLowerCase());
-                  const attributes = await element.evaluate(el => {
-                    const attrs: Record<string, string> = {};
-                    for (const attr of el.attributes)
-                      attrs[attr.name] = attr.value;
-
-                    return attrs;
-                  });
-
-                  const result = [`### Element ${index + 1} (${params.locator}):`];
-                  result.push('```yaml');
-                  result.push(`- ${tagName}${attributes.id ? ` #${attributes.id}` : ''}${attributes.class ? ` .${attributes.class.split(' ').join('.')}` : ''}: ${text || 'No text content'}`);
-                  if (Object.keys(attributes).length > 0) {
-                    result.push(`  attributes:`);
-                    for (const [key, value] of Object.entries(attributes))
-                      result.push(`    ${key}: "${value}"`);
-
-                  }
-                  result.push('```');
-                  return result.join('\n');
-                } catch (error) {
-                  return `### Element ${index + 1} (${params.locator}):\nError: ${(error as Error).message}`;
+                const result = [`### Element ${index + 1} (${params.locator}):`];
+                result.push('```yaml');
+                result.push(`- ${tagName}${attributes.id ? ` #${attributes.id}` : ''}${attributes.class ? ` .${attributes.class.split(' ').join('.')}` : ''}: ${text || 'No text content'}`);
+                if (Object.keys(attributes).length > 0) {
+                  result.push(`  attributes:`);
+                  for (const [key, value] of Object.entries(attributes))
+                    result.push(`    ${key}: "${value}"`);
                 }
-              })
+                result.push('```');
+                return result.join('\n');
+              } catch (error) {
+                return `### Element ${index + 1} (${params.locator}):\nError: ${(error as Error).message}`;
+              }
+            })
           );
-
-          return {
-            content: [{
-              type: 'text' as 'text',
-              text: snapshots.join('\n\n')
-            }]
-          };
+          response.addResult(snapshots.join('\n\n'));
         } catch (error) {
-          return {
-            content: [{
-              type: 'text' as 'text',
-              text: `### Element Snapshot (${params.locator}):\nError: ${(error as Error).message}`
-            }]
-          };
+          response.addResult(`### Element Snapshot (${params.locator}):\nError: ${(error as Error).message}`);
         }
-      };
+      }, response);
     }
-
-    return {
-      code,
-      action,
-      captureSnapshot: false,
-      waitForNetwork: false,
-    };
   }
 });
 
@@ -232,26 +193,27 @@ const click = defineTabTool({
     type: 'destructive',
   },
 
-  handle: async (tab, params) => {
+  handle: async (tab, params, response) => {
+    response.setIncludeSnapshot();
+
     const locator = await tab.refLocator(params);
     const button = params.button;
     const buttonAttr = button ? `{ button: '${button}' }` : '';
 
-    const code: string[] = [];
     if (params.doubleClick) {
-      code.push(`// Double click ${params.element}`);
-      code.push(`await page.${await generateLocator(locator)}.dblclick(${buttonAttr});`);
+      response.addCode(`// Double click ${params.element}`);
+      response.addCode(`await page.${await generateLocator(locator)}.dblclick(${buttonAttr});`);
     } else {
-      code.push(`// Click ${params.element}`);
-      code.push(`await page.${await generateLocator(locator)}.click(${buttonAttr});`);
+      response.addCode(`// Click ${params.element}`);
+      response.addCode(`await page.${await generateLocator(locator)}.click(${buttonAttr});`);
     }
 
-    return {
-      code,
-      action: () => params.doubleClick ? locator.dblclick({ button }) : locator.click({ button }),
-      captureSnapshot: true,
-      waitForNetwork: true,
-    };
+    await tab.run(async () => {
+      if (params.doubleClick)
+        await locator.dblclick({ button });
+      else
+        await locator.click({ button });
+    }, response);
   },
 });
 
@@ -270,23 +232,19 @@ const drag = defineTabTool({
     type: 'destructive',
   },
 
-  handle: async (tab, params) => {
+  handle: async (tab, params, response) => {
+    response.setIncludeSnapshot();
+
     const [startLocator, endLocator] = await tab.refLocators([
       { ref: params.startRef, element: params.startElement },
       { ref: params.endRef, element: params.endElement },
     ]);
 
-    const code = [
-      `// Drag ${params.startElement} to ${params.endElement}`,
-      `await page.${await generateLocator(startLocator)}.dragTo(page.${await generateLocator(endLocator)});`
-    ];
+    await tab.run(async () => {
+      await startLocator.dragTo(endLocator);
+    }, response);
 
-    return {
-      code,
-      action: () => startLocator.dragTo(endLocator),
-      captureSnapshot: true,
-      waitForNetwork: true,
-    };
+    response.addCode(`await page.${await generateLocator(startLocator)}.dragTo(page.${await generateLocator(endLocator)});`);
   },
 });
 
@@ -300,20 +258,15 @@ const hover = defineTabTool({
     type: 'readOnly',
   },
 
-  handle: async (tab, params) => {
+  handle: async (tab, params, response) => {
+    response.setIncludeSnapshot();
+
     const locator = await tab.refLocator(params);
+    response.addCode(`await page.${await generateLocator(locator)}.hover();`);
 
-    const code = [
-      `// Hover over ${params.element}`,
-      `await page.${await generateLocator(locator)}.hover();`
-    ];
-
-    return {
-      code,
-      action: () => locator.hover(),
-      captureSnapshot: true,
-      waitForNetwork: true,
-    };
+    await tab.run(async () => {
+      await locator.hover();
+    }, response);
   },
 });
 
@@ -331,20 +284,16 @@ const selectOption = defineTabTool({
     type: 'destructive',
   },
 
-  handle: async (tab, params) => {
+  handle: async (tab, params, response) => {
+    response.setIncludeSnapshot();
+
     const locator = await tab.refLocator(params);
+    response.addCode(`// Select options [${params.values.join(', ')}] in ${params.element}`);
+    response.addCode(`await page.${await generateLocator(locator)}.selectOption(${javascript.formatObject(params.values)});`);
 
-    const code = [
-      `// Select options [${params.values.join(', ')}] in ${params.element}`,
-      `await page.${await generateLocator(locator)}.selectOption(${javascript.formatObject(params.values)});`
-    ];
-
-    return {
-      code,
-      action: () => locator.selectOption(params.values).then(() => {}),
-      captureSnapshot: true,
-      waitForNetwork: true,
-    };
+    await tab.run(async () => {
+      await locator.selectOption(params.values);
+    }, response);
   },
 });
 

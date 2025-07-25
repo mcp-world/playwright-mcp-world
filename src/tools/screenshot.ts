@@ -65,7 +65,7 @@ const screenshot = defineTabTool({
     },
   },
 
-  handle: async (tab, params) => {
+  handle: async (tab, params, response) => {
     // Determine file type: use format if provided, otherwise use raw flag
     const fileType = params.format || (params.raw ? 'png' : 'jpeg');
     
@@ -94,9 +94,7 @@ const screenshot = defineTabTool({
       screenshotType = 'full page';
 
     const screenshotTarget = isElementScreenshot ? params.element : (isLocatorScreenshot ? `element(s) by locator "${params.locator}"` : screenshotType);
-    const code = [
-      `// Screenshot ${screenshotTarget} and save it as ${fileName}`,
-    ];
+    response.addCode(`// Screenshot ${screenshotTarget} and save it as ${fileName}`);
 
     // Only get snapshot when element screenshot is needed
     let locator = null;
@@ -106,83 +104,52 @@ const screenshot = defineTabTool({
       locator = tab.page.locator(params.locator);
 
     if (locator && params.locator) {
-      code.push(`const elements = await page.locator('${params.locator}').all();`);
-      code.push(`const screenshots = await Promise.all(elements.map(el => el.screenshot(${javascript.formatObject(options)})));`);
+      response.addCode(`const elements = await page.locator('${params.locator}').all();`);
+      response.addCode(`const screenshots = await Promise.all(elements.map(el => el.screenshot(${javascript.formatObject(options)})));`);
     } else if (locator) {
-      code.push(`await ${await generateLocator(locator)}.screenshot(${javascript.formatObject(options)});`);
+      response.addCode(`await ${await generateLocator(locator)}.screenshot(${javascript.formatObject(options)});`);
     } else {
-      code.push(`await page.screenshot(${javascript.formatObject(options)});`);
+      response.addCode(`await page.screenshot(${javascript.formatObject(options)});`);
     }
 
-    const includeBase64 = tab.context.config.imageResponses !== 'omit';
-    const action = async () => {
+    if (params.captureSnapshot)
+      response.setIncludeSnapshot();
+
+    await tab.run(async () => {
       if (params.locator) {
         const locatorElement = tab.page.locator(params.locator);
         const elements = await locatorElement.all();
 
         if (elements.length === 0) {
           const screenshot = await tab.page.screenshot(options);
-          const content: (TextContent | ImageContent)[] = [
-            {
-              type: 'text' as const,
-              text: `No elements found for locator "${params.locator}". Screenshot of full page taken (${screenshot.length} bytes, ${fileType.toUpperCase()})`
-            }
-          ];
-          if (includeBase64) {
-            content.push({
-              type: 'image' as const,
-              data: screenshot.toString('base64'),
-              mimeType: fileType === 'png' ? 'image/png' : 'image/jpeg',
-            });
-          }
-          return { content };
+          response.addResult(`No elements found for locator "${params.locator}". Screenshot of full page taken (${screenshot.length} bytes, ${fileType.toUpperCase()})`);
+          response.addImage({
+            contentType: fileType === 'png' ? 'image/png' : 'image/jpeg',
+            data: screenshot
+          });
+          return;
         }
 
         const screenshots = await Promise.all(
             elements.map(element => element.screenshot(options))
         );
 
-        const content: (TextContent | ImageContent)[] = [
-          {
-            type: 'text' as const,
-            text: `Screenshot taken of ${screenshots.length} element(s) matching locator "${params.locator}" (${fileType.toUpperCase()})`
-          }
-        ];
-        if (includeBase64) {
-          screenshots.forEach(screenshot => {
-            content.push({
-              type: 'image' as const,
-              data: screenshot.toString('base64'),
-              mimeType: fileType === 'png' ? 'image/png' : 'image/jpeg',
-            });
+        response.addResult(`Screenshot taken of ${screenshots.length} element(s) matching locator "${params.locator}" (${fileType.toUpperCase()})`);
+        screenshots.forEach(screenshot => {
+          response.addImage({
+            contentType: fileType === 'png' ? 'image/png' : 'image/jpeg',
+            data: screenshot
           });
-        }
-        return { content };
+        });
       } else {
-        const screenshot = locator ? await locator.screenshot(options) : await tab.page.screenshot(options);
-        const content: (TextContent | ImageContent)[] = [
-          {
-            type: 'text' as const,
-            text: `Screenshot taken (${screenshot.length} bytes, ${fileType.toUpperCase()})`
-          }
-        ];
-        if (includeBase64) {
-          content.push({
-            type: 'image' as const,
-            data: screenshot.toString('base64'),
-            mimeType: fileType === 'png' ? 'image/png' : 'image/jpeg',
-          });
-        }
-        return { content };
+        const buffer = locator ? await locator.screenshot(options) : await tab.page.screenshot(options);
+        response.addResult(`Took the ${screenshotTarget} screenshot and saved it as ${fileName}`);
+        response.addImage({
+          contentType: fileType === 'png' ? 'image/png' : 'image/jpeg',
+          data: buffer
+        });
       }
-    };
-
-    return {
-      code,
-      action,
-      captureSnapshot: params.captureSnapshot ?? false,
-      waitForNetwork: false,
-    };
+    }, response);
   }
 });
 
