@@ -200,6 +200,19 @@ export class Tab extends EventEmitter<TabEventsInterface> {
   }
 
   async captureSnapshot(truncateParams?: { maxTokens: number; pageNum?: number }): Promise<string> {
+    // Use config truncation settings if no params provided
+    const maxTokens = truncateParams?.maxTokens ?? this.context.config.truncateSnapshot;
+    const pageNum = truncateParams?.pageNum || 1;
+
+    // If truncation is enabled (maxTokens > 0), use the truncated snapshot method
+    if (maxTokens > 0)
+      return await this.captureTruncatedSnapshot(maxTokens, pageNum);
+
+    // Otherwise return full snapshot
+    return await this._captureFullSnapshot();
+  }
+
+  private async _captureFullSnapshot(): Promise<string> {
     const result: string[] = [];
     if (this.modalStates().length) {
       result.push(...this.modalStatesMarkdown());
@@ -222,16 +235,11 @@ export class Tab extends EventEmitter<TabEventsInterface> {
       );
     });
 
-    // If truncation is requested, use the truncated snapshot method
-    if (truncateParams && truncateParams.maxTokens > 0)
-      return await this.captureTruncatedSnapshot(truncateParams.maxTokens, truncateParams.pageNum || 1);
-
-
     return result.join('\n');
   }
 
   async captureTruncatedSnapshot(maxTokens: number, pageNum: number = 1): Promise<string> {
-    const fullSnapshot = await this.captureSnapshot();
+    const fullSnapshot = await this._captureFullSnapshot();
 
     // Extract just the YAML content from the full snapshot
     const yamlMatch = fullSnapshot.match(/```yaml\n([\s\S]*?)\n```/);
