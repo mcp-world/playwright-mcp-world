@@ -217,39 +217,6 @@ test('browser_take_screenshot (imageResponses=omit)', async ({ startClient, serv
   });
 });
 
-test('browser_take_screenshot (cursor)', async ({ startClient, server }, testInfo) => {
-  const outputDir = testInfo.outputPath('output');
-
-  const { client } = await startClient({
-    clientName: 'cursor:vscode',
-    config: { outputDir },
-  });
-
-  expect(await client.callTool({
-    name: 'browser_navigate',
-    arguments: { url: server.HELLO_WORLD },
-  })).toContainTextContent(`Navigate to http://localhost`);
-
-  await client.callTool({
-    name: 'browser_take_screenshot',
-  });
-
-  const result = await client.callTool({
-    name: 'browser_take_screenshot',
-  });
-  
-  // Cursor client should not include images
-  expect(result.content).toHaveLength(2);
-  expect(result.content[0]).toEqual({
-    type: 'text',
-    text: expect.stringMatching(/Screenshot taken \(\d+ bytes, JPEG\)/)
-  });
-  expect(result.content[1]).toEqual({
-    type: 'text',
-    text: expect.stringContaining('Ran Playwright code:')
-  });
-});
-
 test('browser_take_screenshot (fullPage)', async ({ startClient, server }, testInfo) => {
   const { client } = await startClient({
     config: { outputDir: testInfo.outputPath('output') },

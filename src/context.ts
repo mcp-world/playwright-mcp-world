@@ -52,11 +52,9 @@ export class Context {
   }
 
   clientSupportsImages(): boolean {
-    if (this.config.imageResponses === 'allow')
-      return true;
     if (this.config.imageResponses === 'omit')
       return false;
-    return !this.clientVersion?.name.includes('cursor');
+    return true;
   }
 
   modalStates(): ModalState[] {
@@ -269,7 +267,7 @@ ${code.join('\n')}
     this._pendingAction?.dialogShown.resolve();
   }
 
-  async downloadStarted(tab: Tab, download: playwright.Download) {
+  async downloadStarted(_tab: Tab, download: playwright.Download) {
     const entry = {
       download,
       finished: false,
@@ -345,13 +343,13 @@ ${code.join('\n')}
     const result = await this._browserContextFactory.createContext();
     const { browserContext } = result;
     await this._setupRequestInterception(browserContext);
-    
+
     // Setup video recording if configured
     if (this.config.browser.recordVideo && this.config.browser.recordVideo.mode !== 'off') {
       // For individual context video recording, we need to configure each page separately
       // since the recordVideo option is for new contexts, we'll handle this when creating pages
     }
-    
+
     for (const page of browserContext.pages())
       this._onPageCreated(page);
     browserContext.on('page', page => this._onPageCreated(page));
