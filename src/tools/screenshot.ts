@@ -22,7 +22,6 @@ import { outputFile } from '../config.js';
 import { generateLocator } from './utils.js';
 
 import type * as playwright from 'playwright';
-import type { ImageContent, TextContent } from '@modelcontextprotocol/sdk/types.js';
 
 const screenshotSchema = z.object({
   raw: z.boolean().optional().describe('Whether to return without compression (in PNG format). Default is false, which returns a JPEG image.'),
@@ -68,11 +67,11 @@ const screenshot = defineTabTool({
   handle: async (tab, params, response) => {
     // Determine file type: use format if provided, otherwise use raw flag
     const fileType = params.format || (params.raw ? 'png' : 'jpeg');
-    
+
     // Generate filename if saving to file
-    const fileName = params.filename ? await outputFile(tab.context.config, params.filename) : 
-                     await outputFile(tab.context.config, `page-${new Date().toISOString()}.${fileType}`);
-    
+    const fileName = params.filename ? await outputFile(tab.context.config, params.filename) :
+      await outputFile(tab.context.config, `page-${new Date().toISOString()}.${fileType}`);
+
     // Set quality for JPEG
     const quality = fileType === 'jpeg' ? (params.quality || 50) : undefined;
     const options: playwright.PageScreenshotOptions = {

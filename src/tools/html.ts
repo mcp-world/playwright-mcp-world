@@ -51,7 +51,7 @@ const htmlContent = defineTool({
     await tab.waitForCompletion(async () => {
       if (isMultipleLocators) {
         response.addCode(`// Get HTML content of multiple elements: ${params.locators!.join(', ')}`);
-        
+
         const htmlContents = await Promise.all(
           params.locators!.map(async (loc, index) => {
             try {
@@ -63,13 +63,13 @@ const htmlContent = defineTool({
             }
           })
         );
-        
+
         response.addResult(htmlContents.join('\n\n'));
       } else if (isSingleLocator) {
         response.addCode(`// Get HTML content of element(s) by locator: ${params.locator}`);
         response.addCode(`const elements = await page.locator('${params.locator}').all();`);
         response.addCode(`const htmlContents = await Promise.all(elements.map(el => el.innerHTML()));`);
-        
+
         try {
           const locator = tab.page.locator(params.locator!);
           const elements = await locator.all();
@@ -97,7 +97,7 @@ const htmlContent = defineTool({
       } else {
         response.addCode(`// Get full page HTML content`);
         response.addCode(`const html = await page.content();`);
-        
+
         const html = await tab.page.content();
         response.addResult(`### Full Page HTML:\n\`\`\`html\n${html}\n\`\`\``);
       }
@@ -136,7 +136,7 @@ const outerHtmlContent = defineTool({
     await tab.waitForCompletion(async () => {
       if (isMultipleLocators) {
         response.addCode(`// Get outer HTML content of multiple elements: ${params.locators!.join(', ')}`);
-        
+
         const htmlContents = await Promise.all(
           params.locators!.map(async (loc, index) => {
             try {
@@ -148,13 +148,13 @@ const outerHtmlContent = defineTool({
             }
           })
         );
-        
+
         response.addResult(htmlContents.join('\n\n'));
       } else if (isSingleLocator) {
         response.addCode(`// Get outer HTML content of element(s) by locator: ${params.locator}`);
         response.addCode(`const elements = await page.locator('${params.locator}').all();`);
         response.addCode(`const htmlContents = await Promise.all(elements.map(el => el.evaluate(el => el.outerHTML)));`);
-        
+
         try {
           const locator = tab.page.locator(params.locator!);
           const elements = await locator.all();

@@ -221,51 +221,51 @@ export class Tab extends EventEmitter<TabEventsInterface> {
           '```',
       );
     });
-    
+
     // If truncation is requested, use the truncated snapshot method
-    if (truncateParams && truncateParams.maxTokens > 0) {
+    if (truncateParams && truncateParams.maxTokens > 0)
       return await this.captureTruncatedSnapshot(truncateParams.maxTokens, truncateParams.pageNum || 1);
-    }
-    
+
+
     return result.join('\n');
   }
 
   async captureTruncatedSnapshot(maxTokens: number, pageNum: number = 1): Promise<string> {
     const fullSnapshot = await this.captureSnapshot();
-    
+
     // Extract just the YAML content from the full snapshot
     const yamlMatch = fullSnapshot.match(/```yaml\n([\s\S]*?)\n```/);
     const rawSnapshot = yamlMatch ? yamlMatch[1] : '';
-    
+
     // Using the approximation of 0.75 words per token (or 4/3 tokens per word)
     const wordsPerToken = 0.75;
     const maxWordsPerPage = Math.floor(maxTokens * wordsPerToken);
-    
+
     // Split the raw snapshot into lines
     const lines = rawSnapshot.split('\n');
-    
+
     // First pass: identify all element boundaries
     const elementBoundaries: number[] = [];
     let inElement = false;
     let elementStartLine = 0;
-    
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const leadingSpaces = line.match(/^(\s*)/)?.[1]?.length || 0;
       const trimmedLine = line.trim();
-      
+
       // Detect element start (any line that starts a new structure)
       if (trimmedLine && !inElement) {
         inElement = true;
         elementStartLine = i;
       }
-      
+
       // Detect element end (empty line or next element at same/lower indent level)
       if (i < lines.length - 1) {
         const nextLine = lines[i + 1];
         const nextLeadingSpaces = nextLine.match(/^(\s*)/)?.[1]?.length || 0;
         const nextTrimmed = nextLine.trim();
-        
+
         if (!trimmedLine || (nextTrimmed && nextLeadingSpaces <= leadingSpaces && trimmedLine.startsWith('-'))) {
           if (inElement) {
             elementBoundaries.push(elementStartLine);
@@ -275,29 +275,29 @@ export class Tab extends EventEmitter<TabEventsInterface> {
         }
       }
     }
-    
+
     // Handle last element
     if (inElement) {
       elementBoundaries.push(elementStartLine);
       elementBoundaries.push(lines.length);
     }
-    
+
     // Second pass: create pages based on element boundaries
     const pages: { startLine: number; endLine: number; startElement: number; endElement: number }[] = [];
     let currentPageStart = 0;
     let currentWordCount = 0;
     let currentElementIndex = 0;
-    
+
     for (let i = 0; i < elementBoundaries.length; i += 2) {
       const elementStart = elementBoundaries[i];
       const elementEnd = elementBoundaries[i + 1];
-      
+
       // Calculate words in this element
       let elementWordCount = 0;
-      for (let j = elementStart; j < elementEnd; j++) {
+      for (let j = elementStart; j < elementEnd; j++)
         elementWordCount += lines[j].split(/\s+/).filter(w => w.length > 0).length;
-      }
-      
+
+
       // If adding this element would exceed page limit and we have content
       if (currentWordCount + elementWordCount > maxWordsPerPage && currentWordCount > 0) {
         // End current page
@@ -307,7 +307,7 @@ export class Tab extends EventEmitter<TabEventsInterface> {
           startElement: Math.floor(currentElementIndex / 2),
           endElement: Math.floor(i / 2)
         });
-        
+
         // Start new page
         currentPageStart = elementStart;
         currentWordCount = elementWordCount;
@@ -316,7 +316,7 @@ export class Tab extends EventEmitter<TabEventsInterface> {
         currentWordCount += elementWordCount;
       }
     }
-    
+
     // Add final page
     if (currentWordCount > 0) {
       pages.push({
@@ -326,12 +326,12 @@ export class Tab extends EventEmitter<TabEventsInterface> {
         endElement: Math.floor(elementBoundaries.length / 2)
       });
     }
-    
+
     // Get the requested page
     const totalPages = pages.length || 1;
     const actualPage = Math.min(Math.max(1, pageNum), totalPages);
     const pageInfo = pages[actualPage - 1];
-    
+
     if (!pageInfo) {
       // Empty snapshot
       const emptySnapshot = [
@@ -345,45 +345,44 @@ export class Tab extends EventEmitter<TabEventsInterface> {
       ].join('\n');
       return emptySnapshot;
     }
-    
+
     // Extract lines for current page
     const pageLines = lines.slice(pageInfo.startLine, pageInfo.endLine);
-    
+
     // Preserve indentation context if not starting from beginning
     let contextPrefix = '';
     if (pageInfo.startLine > 0) {
       // Find the parent context by looking backwards
-      let parentIndent = -1;
       const firstLineIndent = lines[pageInfo.startLine].match(/^(\s*)/)?.[1]?.length || 0;
-      
+
       for (let i = pageInfo.startLine - 1; i >= 0; i--) {
         const line = lines[i];
         const indent = line.match(/^(\s*)/)?.[1]?.length || 0;
         const trimmed = line.trim();
-        
+
         if (trimmed && indent < firstLineIndent) {
           contextPrefix = '# Context from previous page:\n# ' + line + '\n# ...\n\n';
           break;
         }
       }
     }
-    
+
     // Build custom snapshot content
     const fullLines: string[] = [];
-    
+
     // Add page state header
     fullLines.push(`### Page state`);
     fullLines.push(`- Page URL: ${this.page.url()}`);
     fullLines.push(`- Page Title: ${await this.page.title()}`);
     fullLines.push(`- Page Snapshot (Page ${actualPage} of ${totalPages}):`);
     fullLines.push('```yaml');
-    
-    if (contextPrefix) {
+
+    if (contextPrefix)
       fullLines.push(contextPrefix.trim());
-    }
-    
+
+
     fullLines.push(pageLines.join('\n'));
-    
+
     if (actualPage < totalPages) {
       fullLines.push('');
       fullLines.push('# MORE CONTENT AVAILABLE');
@@ -392,9 +391,9 @@ export class Tab extends EventEmitter<TabEventsInterface> {
       fullLines.push(`# ${Math.floor(elementBoundaries.length / 2) - pageInfo.endElement} more elements on remaining pages`);
       fullLines.push(`# To load the next page, use browser_snapshot with page: ${actualPage + 1}`);
     }
-    
+
     fullLines.push('```');
-    
+
     return fullLines.join('\n');
   }
 

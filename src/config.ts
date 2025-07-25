@@ -181,12 +181,12 @@ export function configFromCLIOptions(cliOptions: CLIOptions): Config {
   let recordVideo: { mode: 'off' | 'on' | 'retain-on-failure' | 'on-first-retry'; size?: { width: number; height: number } } | undefined;
   if (cliOptions.recordVideo) {
     const mode = cliOptions.recordVideo as 'off' | 'on' | 'retain-on-failure' | 'on-first-retry';
-    if (!['off', 'on', 'retain-on-failure', 'on-first-retry'].includes(mode)) {
+    if (!['off', 'on', 'retain-on-failure', 'on-first-retry'].includes(mode))
       throw new Error('Invalid video mode. Use "off", "on", "retain-on-failure", or "on-first-retry"');
-    }
-    
+
+
     recordVideo = { mode };
-    
+
     if (cliOptions.recordVideoSize) {
       try {
         const [width, height] = cliOptions.recordVideoSize.split(',').map(n => +n);

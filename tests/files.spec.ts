@@ -96,7 +96,7 @@ Error: The tool "browser_file_upload" can only be used when there is related mod
 
 test('clicking on download link emits download', async ({ startClient, server, mcpMode }, testInfo) => {
   const { client } = await startClient({
-    config: { 
+    config: {
       outputDir: testInfo.outputPath('output'),
       truncateSnapshot: 0  // Disable truncation for this test
     },
@@ -122,7 +122,7 @@ test('clicking on download link emits download', async ({ startClient, server, m
 
 test('navigating to download link emits download', async ({ startClient, server, mcpBrowser, mcpMode }, testInfo) => {
   const { client } = await startClient({
-    config: { 
+    config: {
       outputDir: testInfo.outputPath('output'),
       truncateSnapshot: 0  // Disable truncation for this test
     },
@@ -144,9 +144,9 @@ test('navigating to download link emits download', async ({ startClient, server,
     },
   });
   // Check if Downloads section is in the response or in a subsequent snapshot
-  if (!response.content.some((c: any) => c.text?.includes('### Downloads'))) {
+  if (!response.content.some((c: any) => c.text?.includes('### Downloads')))
     await expect.poll(() => client.callTool({ name: 'browser_snapshot' })).toContainTextContent('### Downloads');
-  } else {
+  else
     expect(response).toContainTextContent('### Downloads');
-  }
+
 });

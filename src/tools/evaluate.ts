@@ -38,7 +38,7 @@ const evaluate = defineTool({
   handle: async (context, params, response) => {
     const tab = await context.ensureTab();
     response.setIncludeSnapshot();
-    
+
     // Handle element evaluation
     if (params.ref && params.element) {
       const locator = await tab.refLocator({ ref: params.ref, element: params.element });
@@ -48,10 +48,10 @@ const evaluate = defineTool({
         const result = await (locator as any)._evaluateFunction(params.function);
         response.addResult(JSON.stringify(result, null, 2) || 'undefined');
       });
-      
+
       return;
     }
-    
+
     // Handle page evaluation
     response.addCode(`await page.evaluate(${javascript.quote(params.function)});`);
 

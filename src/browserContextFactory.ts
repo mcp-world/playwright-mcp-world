@@ -22,7 +22,6 @@ import os from 'node:os';
 import { addExtra } from 'playwright-extra';
 import * as playwright from 'playwright';
 import stealth from 'puppeteer-extra-plugin-stealth';
-import { userDataDir } from './fileUtils.js';
 
 import { logUnhandledError, testDebug } from './log.js';
 
@@ -120,7 +119,7 @@ class IsolatedContextFactory extends BaseContextFactory {
 
   protected override async _doCreateContext(browser: playwright.Browser): Promise<playwright.BrowserContext> {
     const contextOptions = { ...this.browserConfig.contextOptions };
-    
+
     // Apply video recording configuration if specified
     if (this.browserConfig.recordVideo && this.browserConfig.recordVideo.mode !== 'off') {
       contextOptions.recordVideo = {
@@ -128,7 +127,7 @@ class IsolatedContextFactory extends BaseContextFactory {
         size: this.browserConfig.recordVideo.size,
       };
     }
-    
+
     return browser.newContext(contextOptions);
   }
 }
@@ -193,7 +192,7 @@ class PersistentContextFactory implements BrowserContextFactory {
           handleSIGINT: false,
           handleSIGTERM: false,
         };
-        
+
         // Apply video recording configuration if specified
         if (this.browserConfig.recordVideo && this.browserConfig.recordVideo.mode !== 'off') {
           contextOptions.recordVideo = {
@@ -201,7 +200,7 @@ class PersistentContextFactory implements BrowserContextFactory {
             size: this.browserConfig.recordVideo.size,
           };
         }
-        
+
         const browserContext = await browserType.launchPersistentContext(userDataDir, contextOptions);
         const close = () => this._closeBrowserContext(browserContext, userDataDir);
         return { browserContext, close };

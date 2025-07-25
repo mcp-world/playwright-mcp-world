@@ -21,9 +21,9 @@ test.describe('truncateSnapshot', () => {
   const generateWords = (count: number): string => {
     const words = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
     const result: string[] = [];
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < count; i++)
       result.push(words[i % words.length]);
-    }
+
     return result.join(' ');
   };
 
@@ -34,7 +34,7 @@ test.describe('truncateSnapshot', () => {
     const wordsPerParagraph = 100;
     const paragraphsPerSection = 10;
     const sections = 30; // 30 sections * 10 paragraphs * 100 words = 30,000 words
-    
+
     server.setContent('/snapshot-truncation.html', `
       <!DOCTYPE html>
       <html>

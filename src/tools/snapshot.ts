@@ -34,14 +34,14 @@ const snapshot = defineTool({
 
   handle: async (context, params, response) => {
     await context.ensureTab();
-    
+
     const maxTokens = context.config.truncateSnapshot;
     const pageNum = params.page || 1;
-    
+
     response.setIncludeSnapshot();
-    if (maxTokens > 0) {
+    if (maxTokens > 0)
       response.setTruncateParams({ maxTokens, pageNum });
-    }
+
   },
 });
 
@@ -132,35 +132,35 @@ const elementSnapshot = defineTool({
           }
 
           const snapshots = await Promise.all(
-            elements.map(async (element, index) => {
-              try {
-                const isVisible = await element.isVisible();
-                if (!isVisible)
-                  return `### Element ${index + 1} (${params.locator}):\nElement not visible`;
+              elements.map(async (element, index) => {
+                try {
+                  const isVisible = await element.isVisible();
+                  if (!isVisible)
+                    return `### Element ${index + 1} (${params.locator}):\nElement not visible`;
 
-                const text = await element.textContent();
-                const tagName = await element.evaluate(el => el.tagName.toLowerCase());
-                const attributes = await element.evaluate(el => {
-                  const attrs: Record<string, string> = {};
-                  for (const attr of el.attributes)
-                    attrs[attr.name] = attr.value;
-                  return attrs;
-                });
+                  const text = await element.textContent();
+                  const tagName = await element.evaluate(el => el.tagName.toLowerCase());
+                  const attributes = await element.evaluate(el => {
+                    const attrs: Record<string, string> = {};
+                    for (const attr of el.attributes)
+                      attrs[attr.name] = attr.value;
+                    return attrs;
+                  });
 
-                const result = [`### Element ${index + 1} (${params.locator}):`];
-                result.push('```yaml');
-                result.push(`- ${tagName}${attributes.id ? ` #${attributes.id}` : ''}${attributes.class ? ` .${attributes.class.split(' ').join('.')}` : ''}: ${text || 'No text content'}`);
-                if (Object.keys(attributes).length > 0) {
-                  result.push(`  attributes:`);
-                  for (const [key, value] of Object.entries(attributes))
-                    result.push(`    ${key}: "${value}"`);
+                  const result = [`### Element ${index + 1} (${params.locator}):`];
+                  result.push('```yaml');
+                  result.push(`- ${tagName}${attributes.id ? ` #${attributes.id}` : ''}${attributes.class ? ` .${attributes.class.split(' ').join('.')}` : ''}: ${text || 'No text content'}`);
+                  if (Object.keys(attributes).length > 0) {
+                    result.push(`  attributes:`);
+                    for (const [key, value] of Object.entries(attributes))
+                      result.push(`    ${key}: "${value}"`);
+                  }
+                  result.push('```');
+                  return result.join('\n');
+                } catch (error) {
+                  return `### Element ${index + 1} (${params.locator}):\nError: ${(error as Error).message}`;
                 }
-                result.push('```');
-                return result.join('\n');
-              } catch (error) {
-                return `### Element ${index + 1} (${params.locator}):\nError: ${(error as Error).message}`;
-              }
-            })
+              })
           );
           response.addResult(snapshots.join('\n\n'));
         } catch (error) {

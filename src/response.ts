@@ -67,7 +67,7 @@ export class Response {
   setIncludeTabs() {
     this._includeTabs = true;
   }
-  
+
   setTruncateParams(params: { maxTokens: number; pageNum?: number }) {
     this._truncateParams = params;
   }

@@ -60,7 +60,7 @@ test('browser_take_screenshot (element)', async ({ startClient, server }, testIn
       ref: 'e1',
     },
   });
-  
+
   expect(result.content).toHaveLength(2);
   expect(result.content[0]).toEqual({
     text: expect.stringContaining(`getByText('Hello, world!').screenshot`),
