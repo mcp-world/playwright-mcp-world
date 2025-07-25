@@ -19,15 +19,14 @@ import net from 'node:net';
 import path from 'node:path';
 import os from 'node:os';
 
-import debug from 'debug';
 import { addExtra } from 'playwright-extra';
 import * as playwright from 'playwright';
 import stealth from 'puppeteer-extra-plugin-stealth';
 import { userDataDir } from './fileUtils.js';
 
-import type { FullConfig } from './config.js';
+import { logUnhandledError, testDebug } from './log.js';
 
-const testDebug = debug('pw:mcp:test');
+import type { FullConfig } from './config.js';
 
 function getVideoDir(outputDir?: string): string {
   return path.join(outputDir || process.cwd(), 'videos');
@@ -91,10 +90,10 @@ class BaseContextFactory implements BrowserContextFactory {
     testDebug(`close browser context (${this.name})`);
     if (browser.contexts().length === 1)
       this._browserPromise = undefined;
-    await browserContext.close().catch(() => {});
+    await browserContext.close().catch(logUnhandledError);
     if (browser.contexts().length === 0) {
       testDebug(`close browser (${this.name})`);
-      await browser.close().catch(() => {});
+      await browser.close().catch(logUnhandledError);
     }
   }
 }
