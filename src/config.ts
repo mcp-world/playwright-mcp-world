@@ -44,6 +44,7 @@ export type CLIOptions = {
   proxyServer?: string;
   recordVideo?: string;
   recordVideoSize?: string;
+  saveSession?: boolean;
   saveTrace?: boolean;
   storageState?: string;
   userAgent?: string;
@@ -214,6 +215,7 @@ export function configFromCLIOptions(cliOptions: CLIOptions): Config {
       allowedOrigins: cliOptions.allowedOrigins,
       blockedOrigins: cliOptions.blockedOrigins,
     },
+    saveSession: cliOptions.saveSession,
     saveTrace: cliOptions.saveTrace,
     outputDir: cliOptions.outputDir,
     imageResponses: cliOptions.imageResponses,
@@ -244,6 +246,9 @@ function configFromEnv(): Config {
   options.port = envToNumber(process.env.PLAYWRIGHT_MCP_PORT);
   options.proxyBypass = envToString(process.env.PLAYWRIGHT_MCP_PROXY_BYPASS);
   options.proxyServer = envToString(process.env.PLAYWRIGHT_MCP_PROXY_SERVER);
+  options.recordVideo = envToString(process.env.PLAYWRIGHT_MCP_RECORD_VIDEO);
+  options.recordVideoSize = envToString(process.env.PLAYWRIGHT_MCP_RECORD_VIDEO_SIZE);
+  options.saveSession = envToBoolean(process.env.PLAYWRIGHT_MCP_SAVE_SESSION);
   options.saveTrace = envToBoolean(process.env.PLAYWRIGHT_MCP_SAVE_TRACE);
   options.storageState = envToString(process.env.PLAYWRIGHT_MCP_STORAGE_STATE);
   options.userAgent = envToString(process.env.PLAYWRIGHT_MCP_USER_AGENT);

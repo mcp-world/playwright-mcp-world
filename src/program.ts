@@ -48,6 +48,7 @@ program
     .option('--proxy-server <proxy>', 'specify proxy server, for example "http://myproxy:3128" or "socks5://myproxy:8080"')
     .option('--record-video <mode>', 'record video mode: "off", "on", "retain-on-failure", or "on-first-retry"')
     .option('--record-video-size <size>', 'video size in pixels, for example "800,600"')
+    .option('--save-session', 'Whether to save the Playwright MCP session into the output directory.')
     .option('--save-trace', 'Whether to save the Playwright Trace of the session into the output directory.')
     .option('--storage-state <path>', 'path to the storage state file for isolated sessions.')
     .option('--user-agent <ua string>', 'specify user agent string')
