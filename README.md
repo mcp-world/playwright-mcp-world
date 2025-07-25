@@ -7,6 +7,18 @@ An enhanced Model Context Protocol (MCP) server that provides browser automation
 - **Fast and lightweight**. Uses Playwright's accessibility tree, not pixel-based input.
 - **LLM-friendly**. No vision models needed, operates purely on structured data.
 - **Deterministic tool application**. Avoids ambiguity common with screenshot-based approaches.
+- **Automatic snapshot pagination**. Large page content is automatically split into manageable chunks, preventing token limit errors in Claude and other LLMs.
+
+### 📄 Smart Pagination for Large Pages
+
+**Never worry about token limits!** This server automatically handles large web pages by:
+
+- **Automatic token counting** using tiktoken to accurately measure content size
+- **Smart pagination** that splits snapshots into multiple pages when they exceed limits
+- **Seamless navigation** through pages using `browser_snapshot` with `page` parameter
+- **Context preservation** across pages to maintain understanding of page structure
+
+Perfect for working with content-heavy sites like documentation, forums, or long articles without hitting Claude's token limits.
 
 ### Enhanced Features 🚀
 
