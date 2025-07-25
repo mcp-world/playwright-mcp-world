@@ -41,8 +41,8 @@ export class PageSnapshot {
   }
 
   truncatedText(maxTokens: number = 20000, pageNumber: number = 1): { text: string; isTruncated: boolean; currentPage: number; totalPages: number } {
-    // Using the approximation of 0.75 tokens per word
-    const wordsPerToken = 1 / 0.75;
+    // Using the approximation of 0.75 words per token (or 4/3 tokens per word)
+    const wordsPerToken = 0.75;
     const maxWordsPerPage = Math.floor(maxTokens * wordsPerToken);
     
     // Split the raw snapshot into lines
