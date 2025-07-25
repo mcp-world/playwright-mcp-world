@@ -35,6 +35,12 @@ export type ToolSchema<Input extends z.Schema> = {
   description: string;
   inputSchema: Input;
   type: 'readOnly' | 'destructive';
+  // Advanced metadata for documentation generation
+  advanced?: {
+    isNew?: boolean;       // 🆕 New tool
+    isEnhanced?: boolean;  // ⭐ Enhanced with additional features
+    enhancementNote?: string; // Description of enhancements
+  };
 };
 
 export type ToolHandler = (toolName: string, params: any) => Promise<ToolResponse>;
