@@ -70,3 +70,37 @@ test('browser_evaluate (error)', async ({ client, server }) => {
   const errorText = result.content?.[0]?.text || '';
   expect(errorText).toMatch(/not defined|Can't find variable/);
 });
+
+test('browser_evaluate (async/promise)', async ({ client, server }) => {
+  expect(await client.callTool({
+    name: 'browser_navigate',
+    arguments: { url: server.HELLO_WORLD },
+  })).toContainTextContent(`- Page Title: Title`);
+
+  // Test async function with await
+  const asyncResult = await client.callTool({
+    name: 'browser_evaluate',
+    arguments: {
+      function: 'async () => { await new Promise(r => setTimeout(r, 100)); return "async result"; }',
+    },
+  });
+  expect(asyncResult).toContainTextContent(`"async result"`);
+
+  // Test promise return
+  const promiseResult = await client.callTool({
+    name: 'browser_evaluate',
+    arguments: {
+      function: '() => Promise.resolve("promise result")',
+    },
+  });
+  expect(promiseResult).toContainTextContent(`"promise result"`);
+
+  // Test async computation
+  const computeResult = await client.callTool({
+    name: 'browser_evaluate',
+    arguments: {
+      function: 'async () => { const a = await Promise.resolve(5); const b = await Promise.resolve(10); return a + b; }',
+    },
+  });
+  expect(computeResult).toContainTextContent(`15`);
+});
