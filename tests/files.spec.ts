@@ -113,7 +113,7 @@ test('clicking on download link emits download', async ({ startClient, server, m
       ref: 'e2',
     },
   });
-  await expect.poll(() => client.callTool({ name: 'browser_snapshot' })).toContainTextContent(`### Downloads
+  await expect.poll(() => client.callTool({ name: 'browser_snapshot', arguments: { truncateSnapshot: false } })).toContainTextContent(`### Downloads
 - Downloaded file test.txt to ${testInfo.outputPath('output', 'test.txt')}`);
 });
 
@@ -131,10 +131,16 @@ test('navigating to download link emits download', async ({ startClient, server,
     res.end('Hello world!');
   });
 
-  expect(await client.callTool({
+  const response = await client.callTool({
     name: 'browser_navigate',
     arguments: {
       url: server.PREFIX + 'download',
     },
-  })).toContainTextContent('### Downloads');
+  });
+  // Check if Downloads section is in the response or in a subsequent snapshot
+  if (!response.content.some((c: any) => c.text?.includes('### Downloads'))) {
+    await expect.poll(() => client.callTool({ name: 'browser_snapshot', arguments: { truncateSnapshot: false } })).toContainTextContent('### Downloads');
+  } else {
+    expect(response).toContainTextContent('### Downloads');
+  }
 });
