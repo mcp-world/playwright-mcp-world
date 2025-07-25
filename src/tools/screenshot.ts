@@ -67,7 +67,6 @@ const screenshot = defineTool({
 
   handle: async (context, params) => {
     const tab = context.currentTabOrDie();
-    const snapshot = tab.snapshotOrDie();
     
     // Determine file type: use format if provided, otherwise use raw flag
     const fileType = params.format || (params.raw ? 'png' : 'jpeg');
@@ -78,8 +77,6 @@ const screenshot = defineTool({
     
     // Set quality for JPEG
     const quality = fileType === 'jpeg' ? (params.quality || 50) : undefined;
-    
-    // Screenshot options
     const options: playwright.PageScreenshotOptions = {
       type: fileType,
       quality,
@@ -103,9 +100,10 @@ const screenshot = defineTool({
       `// Screenshot ${screenshotTarget} and save it as ${fileName}`,
     ];
 
+    // Only get snapshot when element screenshot is needed
     let locator = null;
     if (params.ref)
-      locator = snapshot.refLocator({ element: params.element || '', ref: params.ref });
+      locator = tab.snapshotOrDie().refLocator({ element: params.element || '', ref: params.ref });
     else if (params.locator)
       locator = tab.page.locator(params.locator);
 
