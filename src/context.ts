@@ -190,26 +190,28 @@ ${code.join('\n')}
       result.push('');
     }
 
-    if (this.tabs().length > 1)
-      result.push(await this.listTabsMarkdown(), '');
-
-    if (this.tabs().length > 1)
-      result.push('### Current tab');
-
-    result.push(
-        `- Page URL: ${tab.page.url()}`,
-        `- Page Title: ${await tab.title()}`
-    );
-
     if (captureSnapshot && tab.hasSnapshot()) {
-      // Use truncation if enabled (default true)
-      const shouldTruncate = truncateSnapshot !== false;
-      if (shouldTruncate) {
-        const pageNumber = snapshotPage ?? 1;
-        const truncatedResult = tab.snapshotOrDie().truncatedText(20000, pageNumber);
-        result.push(truncatedResult.text);
-      } else {
-        result.push(tab.snapshotOrDie().text());
+      if (this.tabs().length > 1)
+        result.push(await this.listTabsMarkdown(), '');
+
+      if (this.tabs().length > 1)
+        result.push('### Current tab');
+
+      result.push(
+          `- Page URL: ${tab.page.url()}`,
+          `- Page Title: ${await tab.title()}`
+      );
+
+      if (captureSnapshot && tab.hasSnapshot()) {
+        // Use truncation if enabled (default true)
+        const shouldTruncate = truncateSnapshot !== false;
+        if (shouldTruncate) {
+          const pageNumber = snapshotPage ?? 1;
+          const truncatedResult = tab.snapshotOrDie().truncatedText(20000, pageNumber);
+          result.push(truncatedResult.text);
+        } else {
+          result.push(tab.snapshotOrDie().text());
+        }
       }
     }
 

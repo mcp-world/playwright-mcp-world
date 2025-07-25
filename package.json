@@ -63,7 +63,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.19.0",
-    "@playwright/test": "1.55.0-alpha-1752540053000",
+    "@playwright/test": "1.55.0-alpha-1752701791000",
     "@stylistic/eslint-plugin": "^3.0.1",
     "@types/chrome": "^0.0.315",
     "@types/debug": "^4.1.12",
