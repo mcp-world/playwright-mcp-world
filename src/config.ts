@@ -51,7 +51,6 @@ export type CLIOptions = {
   userAgent?: string;
   userDataDir?: string;
   viewportSize?: string;
-  vision?: boolean;
 };
 
 const defaultConfig: FullConfig = {
@@ -210,7 +209,6 @@ export async function configFromCLIOptions(cliOptions: CLIOptions): Promise<Conf
       host: cliOptions.host,
     },
     capabilities: cliOptions.caps?.split(',').map((c: string) => c.trim() as ToolCapability),
-    vision: !!cliOptions.vision,
     network: {
       allowedOrigins: cliOptions.allowedOrigins,
       blockedOrigins: cliOptions.blockedOrigins,

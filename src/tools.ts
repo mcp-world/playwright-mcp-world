@@ -30,45 +30,28 @@ import snapshot from './tools/snapshot.js';
 import tabs from './tools/tabs.js';
 import screenshot from './tools/screenshot.js';
 import video from './tools/video.js';
-import vision from './tools/vision.js';
 import wait from './tools/wait.js';
+import mouse from './tools/mouse.js';
 
 import type { Tool } from './tools/tool.js';
 
-export const snapshotTools: Tool<any>[] = [
-  ...common(true),
+export const allTools: Tool<any>[] = [
+  ...common,
   ...console,
-  ...dialogs(true),
+  ...dialogs,
   ...evaluate,
-  ...files(true),
+  ...files,
   ...html,
   ...install,
   ...javascript,
-  ...keyboard(true),
-  ...navigate(true),
+  ...keyboard,
+  ...navigate,
   ...network,
+  ...mouse,
   ...pdf,
   ...screenshot,
   ...snapshot,
-  ...tabs(true),
+  ...tabs,
   ...video,
-  ...wait(true),
-];
-
-export const visionTools: Tool<any>[] = [
-  ...common(false),
-  ...console,
-  ...dialogs(false),
-  ...files(false),
-  ...html,
-  ...install,
-  ...javascript,
-  ...keyboard(false),
-  ...navigate(false),
-  ...network,
-  ...pdf,
-  ...tabs(false),
-  ...video,
-  ...vision,
-  ...wait(false),
+  ...wait,
 ];
