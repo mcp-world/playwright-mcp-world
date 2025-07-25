@@ -37,19 +37,11 @@ test('browser_element_snapshot (single locator - single element)', async ({ clie
     arguments: { locator: '#content' },
   });
 
-  expect(result).toEqual({
-    content: [
-      {
-        text: expect.stringContaining('### Element 1 (#content):'),
-        type: 'text',
-      },
-      {
-        text: expect.stringContaining('- Ran Playwright code:'),
-        type: 'text',
-      },
-    ],
-  });
-
+  expect(result.content).toHaveLength(1);
+  expect(result.content[0].type).toBe('text');
+  expect(result.content[0].text).toContain('### Result');
+  expect(result.content[0].text).toContain('### Element 1 (#content):');
+  expect(result.content[0].text).toContain('### Ran Playwright code');
   expect(result.content[0].text).toContain('```yaml');
   expect(result.content[0].text).toContain('- div #content .container:');
   expect(result.content[0].text).toContain('Main Title');
@@ -80,19 +72,11 @@ test('browser_element_snapshot (single locator - multiple elements)', async ({ c
     arguments: { locator: '.item' },
   });
 
-  expect(result).toEqual({
-    content: [
-      {
-        text: expect.stringMatching(/### Element 1 \(\.item\):[\s\S]*### Element 2 \(\.item\):[\s\S]*### Element 3 \(\.item\):/),
-        type: 'text',
-      },
-      {
-        text: expect.stringContaining('- Ran Playwright code:'),
-        type: 'text',
-      },
-    ],
-  });
-
+  expect(result.content).toHaveLength(1);
+  expect(result.content[0].type).toBe('text');
+  expect(result.content[0].text).toContain('### Result');
+  expect(result.content[0].text).toMatch(/### Element 1 \(\.item\):[\s\S]*### Element 2 \(\.item\):[\s\S]*### Element 3 \(\.item\):/);
+  expect(result.content[0].text).toContain('### Ran Playwright code');
   expect(result.content[0].text).toContain('First item');
   expect(result.content[0].text).toContain('Second item');
   expect(result.content[0].text).toContain('Third item');
@@ -120,19 +104,11 @@ test('browser_element_snapshot (multiple locators)', async ({ client, server }) 
     arguments: { locators: ['#title', '.btn'] },
   });
 
-  expect(result).toEqual({
-    content: [
-      {
-        text: expect.stringMatching(/### Element 1 \(#title\):[\s\S]*### Element 2 \(\.btn\):/),
-        type: 'text',
-      },
-      {
-        text: expect.stringContaining('- Ran Playwright code:'),
-        type: 'text',
-      },
-    ],
-  });
-
+  expect(result.content).toHaveLength(1);
+  expect(result.content[0].type).toBe('text');
+  expect(result.content[0].text).toContain('### Result');
+  expect(result.content[0].text).toMatch(/### Element 1 \(#title\):[\s\S]*### Element 2 \(\.btn\):/);
+  expect(result.content[0].text).toContain('### Ran Playwright code');
   expect(result.content[0].text).toContain('- h1 #title .heading: Page Title');
   expect(result.content[0].text).toContain('- button .btn.primary: Submit');
   expect(result.content[0].text).toContain('id: "title"');
@@ -150,18 +126,11 @@ test('browser_element_snapshot (locator - no elements found)', async ({ client, 
     arguments: { locator: '.non-existent' },
   });
 
-  expect(result).toEqual({
-    content: [
-      {
-        text: expect.stringContaining('No elements found with this locator'),
-        type: 'text',
-      },
-      {
-        text: expect.stringContaining('- Ran Playwright code:'),
-        type: 'text',
-      },
-    ],
-  });
+  expect(result.content).toHaveLength(1);
+  expect(result.content[0].type).toBe('text');
+  expect(result.content[0].text).toContain('### Result');
+  expect(result.content[0].text).toContain('No elements found with this locator');
+  expect(result.content[0].text).toContain('### Ran Playwright code');
 });
 
 test('browser_element_snapshot (hidden element)', async ({ client, server }) => {
@@ -183,18 +152,11 @@ test('browser_element_snapshot (hidden element)', async ({ client, server }) => 
     arguments: { locator: '#hidden' },
   });
 
-  expect(result).toEqual({
-    content: [
-      {
-        text: expect.stringContaining('Element not visible'),
-        type: 'text',
-      },
-      {
-        text: expect.stringContaining('- Ran Playwright code:'),
-        type: 'text',
-      },
-    ],
-  });
+  expect(result.content).toHaveLength(1);
+  expect(result.content[0].type).toBe('text');
+  expect(result.content[0].text).toContain('### Result');
+  expect(result.content[0].text).toContain('Element not visible');
+  expect(result.content[0].text).toContain('### Ran Playwright code');
 });
 
 test('browser_element_snapshot (complex nested elements)', async ({ client, server }) => {
@@ -224,19 +186,11 @@ test('browser_element_snapshot (complex nested elements)', async ({ client, serv
     arguments: { locator: '.post' },
   });
 
-  expect(result).toEqual({
-    content: [
-      {
-        text: expect.stringContaining('### Element 1 (.post):'),
-        type: 'text',
-      },
-      {
-        text: expect.stringContaining('- Ran Playwright code:'),
-        type: 'text',
-      },
-    ],
-  });
-
+  expect(result.content).toHaveLength(1);
+  expect(result.content[0].type).toBe('text');
+  expect(result.content[0].text).toContain('### Result');
+  expect(result.content[0].text).toContain('### Element 1 (.post):');
+  expect(result.content[0].text).toContain('### Ran Playwright code');
   expect(result.content[0].text).toContain('- article .post:');
   expect(result.content[0].text).toContain('Article Title');
   expect(result.content[0].text).toContain('January 1, 2024');
