@@ -27,7 +27,7 @@ test('browser_take_screenshot (viewport)', async ({ startClient, server }, testI
     arguments: { url: server.HELLO_WORLD },
   })).toContainTextContent(`Navigate to http://localhost`);
 
-  const result = await client.callTool({
+  expect(await client.callTool({
     name: 'browser_take_screenshot',
   })).toEqual({
     content: [
@@ -53,7 +53,7 @@ test('browser_take_screenshot (element)', async ({ startClient, server }, testIn
     arguments: { url: server.HELLO_WORLD },
   })).toContainTextContent(`[ref=e1]`);
 
-  const result = await client.callTool({
+  expect(await client.callTool({
     name: 'browser_take_screenshot',
     arguments: {
       element: 'hello button',
@@ -106,7 +106,7 @@ for (const raw of [undefined, true]) {
       arguments: { url: server.PREFIX },
     })).toContainTextContent(`Navigate to http://localhost`);
 
-    const result = await client.callTool({
+    expect(await client.callTool({
       name: 'browser_take_screenshot',
       arguments: { raw },
     })).toEqual({
@@ -146,7 +146,7 @@ test('browser_take_screenshot (filename: "output.jpeg")', async ({ startClient, 
     arguments: { url: server.HELLO_WORLD },
   })).toContainTextContent(`Navigate to http://localhost`);
 
-  const result = await client.callTool({
+  expect(await client.callTool({
     name: 'browser_take_screenshot',
     arguments: {
       filename: 'output.jpeg',
@@ -190,19 +190,17 @@ test('browser_take_screenshot (imageResponses=omit)', async ({ startClient, serv
     name: 'browser_take_screenshot',
   });
 
-  const result = await client.callTool({
+  expect(await client.callTool({
     name: 'browser_take_screenshot',
-  });
-  
-  // When imageResponses is 'omit', we should only get text content
-  expect(result.content).toHaveLength(1);
-  expect(result.content[0]).toEqual({
-    type: 'text',
-    text: expect.any(String)
+  })).toEqual({
+    content: [
+      {
+        text: expect.stringContaining(`Screenshot viewport and save it as`),
+        type: 'text',
+      },
+    ],
   });
 });
-
-// Removed tests for our enhanced screenshot features to avoid conflicts
 
 test('browser_take_screenshot (fullPage: true)', async ({ startClient, server }, testInfo) => {
   const { client } = await startClient({
