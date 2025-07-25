@@ -19,20 +19,13 @@ import { defineTool } from './tool.js';
 import { callOnPageNoTrace, generateLocator } from './utils.js';
 import * as javascript from '../javascript.js';
 
-// Support both old and new parameters simultaneously
 const evaluateSchema = z.object({
-  // New format parameters
-  expression: z.string().optional().describe('JavaScript expression or function to evaluate'),
-  args: z.array(z.any()).default([]).describe('Arguments to pass to the function (must be serializable)'),
-  awaitPromise: z.boolean().default(true).describe('Whether to wait for promises to resolve'),
-  timeout: z.number().default(30000).describe('Maximum execution time in milliseconds'),
-  
-  // Old format parameters
-  function: z.string().optional().describe('() => { /* code */ } or (element) => { /* code */ } when element is provided'),
+  function: z.string().describe('JavaScript function to evaluate: () => { /* code */ } or (element) => { /* code */ } when element is provided'),
   element: z.string().optional().describe('Human-readable element description used to obtain permission to interact with the element'),
   ref: z.string().optional().describe('Exact target element reference from the page snapshot'),
-}).refine(data => data.expression || data.function, {
-  message: 'Either expression or function must be provided',
+  args: z.array(z.any()).optional().default([]).describe('Arguments to pass to the function (must be serializable)'),
+  awaitPromise: z.boolean().optional().default(true).describe('Whether to wait for promises to resolve'),
+  timeout: z.number().optional().default(30000).describe('Maximum execution time in milliseconds'),
 });
 
 const evaluate = defineTool({
@@ -48,21 +41,27 @@ const evaluate = defineTool({
   handle: async (context, params, response) => {
     const tab = await context.ensureTab();
     
-    // Use function parameter if expression is not provided
-    const expression = params.expression || params.function;
-    if (!expression) {
-      throw new Error('Either expression or function must be provided');
-    }
-    
-    // Handle element evaluation (old format)
+    // Handle element evaluation
     if (params.ref && params.element) {
       response.setIncludeSnapshot();
       
       const locator = await tab.refLocator({ ref: params.ref, element: params.element });
-      response.addCode(`await page.${await generateLocator(locator)}.evaluate(${javascript.quote(expression)});`);
+      response.addCode(`await page.${await generateLocator(locator)}.evaluate(${javascript.quote(params.function)});`);
 
       await tab.waitForCompletion(async () => {
-        const result = await (locator as any)._evaluateFunction(expression);
+        const result = await callOnPageNoTrace(tab.page, async (page) => {
+          // Create a promise that rejects after timeout
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error(`Evaluation timed out after ${params.timeout}ms`)), params.timeout);
+          });
+          
+          // Evaluate on element
+          const evaluatePromise = (locator as any)._evaluateFunction(params.function);
+          
+          // Race between timeout and evaluation
+          return await Promise.race([evaluatePromise, timeoutPromise]);
+        });
+        
         response.addResult(JSON.stringify(result, null, 2) || 'undefined');
       });
       
@@ -87,32 +86,10 @@ const evaluate = defineTool({
     
     // Generate code for Playwright test
     response.addCode(`// Execute JavaScript in the browser context`);
-    if (params.args.length > 0) {
-      response.addCode(`await page.evaluate(${params.awaitPromise ? 'async ' : ''}(${params.args.map((_, i) => `arg${i}`).join(', ')}) => {`);
-    } else {
-      response.addCode(`await page.evaluate(${params.awaitPromise ? 'async ' : ''}() => {`);
-    }
-    response.addCode(`  ${expression.split('\n').join('\n  ')}`);
-    if (params.args.length > 0) {
-      response.addCode(`}, ${params.args.map(arg => JSON.stringify(arg)).join(', ')});`);
-    } else {
-      response.addCode(`});`);
-    }
+    response.addCode(`await page.evaluate(${javascript.quote(params.function)});`);
 
     await tab.waitForCompletion(async () => {
       try {
-        // If using old format without timeout features, use simple evaluation
-        if (params.function && !params.expression) {
-          const result = await callOnPageNoTrace(tab.page, async (page) => {
-            return await (page as any)._evaluateFunction(expression);
-          });
-          
-          tab.page.off('console', consoleHandler);
-          response.addResult(JSON.stringify(result, null, 2) || 'undefined');
-          return;
-        }
-        
-        // Use enhanced evaluation with timeout and error handling
         const result = await callOnPageNoTrace(tab.page, async (page) => {
           // Create a promise that rejects after timeout
           const timeoutPromise = new Promise((_, reject) => {
@@ -120,18 +97,11 @@ const evaluate = defineTool({
           });
           
           // Create the evaluation promise
-          const evaluatePromise = page.evaluate(async ({ expression, args, awaitPromise }) => {
+          const evaluatePromise = page.evaluate(async ({ functionStr, args, awaitPromise }) => {
             const startEvalTime = Date.now();
             try {
-              // Create function from expression
-              let fn: Function;
-              if (expression.includes('return') || expression.includes('=>') || expression.includes('function')) {
-                // It's likely a function definition
-                fn = new Function(...args.map((_, i) => `arg${i}`), expression);
-              } else {
-                // It's an expression, wrap it in a return statement
-                fn = new Function(...args.map((_, i) => `arg${i}`), `return ${expression}`);
-              }
+              // Create function from string
+              const fn = new Function(`return ${functionStr}`)();
               
               // Execute the function
               let result = fn(...args);
@@ -185,7 +155,7 @@ const evaluate = defineTool({
                 executionTime: Date.now() - startEvalTime
               };
             }
-          }, { expression, args: params.args, awaitPromise: params.awaitPromise });
+          }, { functionStr: params.function, args: params.args || [], awaitPromise: params.awaitPromise });
           
           // Race between timeout and evaluation
           return await Promise.race([evaluatePromise, timeoutPromise]) as { 
@@ -203,34 +173,15 @@ const evaluate = defineTool({
         const totalExecutionTime = Date.now() - startTime;
         
         if (!result.success) {
-          response.addResult(JSON.stringify({
-            result: null,
-            type: 'error',
-            console: consoleMessages,
-            error: result.error,
-            executionTime: totalExecutionTime
-          }, null, 2));
+          throw new Error(result.error);
         } else {
-          response.addResult(JSON.stringify({
-            result: result.result,
-            type: result.type,
-            console: consoleMessages,
-            executionTime: totalExecutionTime
-          }, null, 2));
+          response.addResult(result.result || '');
         }
       } catch (error) {
         // Remove console handler
         tab.page.off('console', consoleHandler);
         
-        const totalExecutionTime = Date.now() - startTime;
-        
-        response.addResult(JSON.stringify({
-          result: null,
-          type: 'error',
-          console: consoleMessages,
-          error: error instanceof Error ? error.message : String(error),
-          executionTime: totalExecutionTime
-        }, null, 2));
+        throw error;
       }
     });
 
