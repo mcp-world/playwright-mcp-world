@@ -166,49 +166,55 @@ Playwright MCP server supports following arguments. They can be provided in the 
 
 ```
 > npx @mcp-world/playwright-mcp-world@latest --help
-  --allowed-origins <origins>  semicolon-separated list of origins to allow the
-                               browser to request. Default is to allow all.
-  --blocked-origins <origins>  semicolon-separated list of origins to block the
-                               browser from requesting. Blocklist is evaluated
-                               before allowlist. If used without the allowlist,
-                               requests not matching the blocklist are still
-                               allowed.
-  --block-service-workers      block service workers
-  --browser <browser>          browser or chrome channel to use, possible
-                               values: chrome, firefox, webkit, msedge.
-  --caps <caps>                comma-separated list of additional capabilities
-                               to enable, possible values: vision, pdf.
-  --cdp-endpoint <endpoint>    CDP endpoint to connect to.
-  --config <path>              path to the configuration file.
-  --device <device>            device to emulate, for example: "iPhone 15"
-  --executable-path <path>     path to the browser executable.
-  --headless                   run browser in headless mode, headed by default
-  --host <host>                host to bind server to. Default is localhost. Use
-                               0.0.0.0 to bind to all interfaces.
-  --ignore-https-errors        ignore https errors
-  --isolated                   keep the browser profile in memory, do not save
-                               it to disk.
-  --image-responses <mode>     whether to send image responses to the client.
-                               Can be "allow" or "omit", Defaults to "allow".
-  --no-sandbox                 disable the sandbox for all process types that
-                               are normally sandboxed.
-  --output-dir <path>          path to the directory for output files.
-  --port <port>                port to listen on for SSE transport.
-  --proxy-bypass <bypass>      comma-separated domains to bypass proxy, for
-                               example ".com,chromium.org,.domain.com"
-  --proxy-server <proxy>       specify proxy server, for example
-                               "http://myproxy:3128" or "socks5://myproxy:8080"
-  --save-session               Whether to save the Playwright MCP session into
-                               the output directory.
-  --save-trace                 Whether to save the Playwright Trace of the
-                               session into the output directory.
-  --storage-state <path>       path to the storage state file for isolated
-                               sessions.
-  --user-agent <ua string>     specify user agent string
-  --user-data-dir <path>       path to the user data directory. If not
-                               specified, a temporary directory will be created.
-  --viewport-size <size>       specify browser viewport size in pixels, for
-                               example "1280, 720"
+  --allowed-origins <origins>   semicolon-separated list of origins to allow the
+                                browser to request. Default is to allow all.
+  --blocked-origins <origins>   semicolon-separated list of origins to block the
+                                browser from requesting. Blocklist is evaluated
+                                before allowlist. If used without the allowlist,
+                                requests not matching the blocklist are still
+                                allowed.
+  --block-service-workers       block service workers
+  --browser <browser>           browser or chrome channel to use, possible
+                                values: chrome, firefox, webkit, msedge.
+  --caps <caps>                 comma-separated list of additional capabilities
+                                to enable, possible values: vision, pdf.
+  --cdp-endpoint <endpoint>     CDP endpoint to connect to.
+  --config <path>               path to the configuration file.
+  --device <device>             device to emulate, for example: "iPhone 15"
+  --executable-path <path>      path to the browser executable.
+  --headless                    run browser in headless mode, headed by default
+  --host <host>                 host to bind server to. Default is localhost.
+                                Use 0.0.0.0 to bind to all interfaces.
+  --ignore-https-errors         ignore https errors
+  --isolated                    keep the browser profile in memory, do not save
+                                it to disk.
+  --image-responses <mode>      whether to send image responses to the client.
+                                Can be "allow" or "omit", Defaults to "allow".
+  --no-sandbox                  disable the sandbox for all process types that
+                                are normally sandboxed.
+  --output-dir <path>           path to the directory for output files.
+  --port <port>                 port to listen on for SSE transport.
+  --proxy-bypass <bypass>       comma-separated domains to bypass proxy, for
+                                example ".com,chromium.org,.domain.com"
+  --proxy-server <proxy>        specify proxy server, for example
+                                "http://myproxy:3128" or "socks5://myproxy:8080"
+  --record-video <mode>         record video mode: "off", "on",
+                                "retain-on-failure", or "on-first-retry"
+  --record-video-size <size>    video size in pixels, for example "800,600"
+  --save-session                Whether to save the Playwright MCP session into
+                                the output directory.
+  --save-trace                  Whether to save the Playwright Trace of the
+                                session into the output directory.
+  --storage-state <path>        path to the storage state file for isolated
+                                sessions.
+  --truncate-snapshot <tokens>  maximum tokens for snapshots (0 to disable
+                                truncation)
+  --user-agent <ua string>      specify user agent string
+  --user-data-dir <path>        path to the user data directory. If not
+                                specified, a temporary directory will be
+                                created.
+  --viewport-size <size>        specify browser viewport size in pixels, for
+                                example "1280, 720"
 ```
 
 <!--- End of options generated section -->
@@ -453,6 +459,17 @@ http.createServer(async (req, res) => {
 
 <!-- NOTE: This has been generated via update-readme.js -->
 
+- **browser_element_snapshot** 🆕
+  - Title: Element snapshot
+  - Description: Capture accessibility snapshot of specific elements by locator(s). Better than screenshot for specific elements.
+  - **Enhancement**: Capture structured accessibility data for specific elements using locators
+  - Parameters:
+    - `locator` (string, optional): Playwright locator string to capture accessibility snapshot of a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with locators parameter.
+    - `locators` (array, optional): Array of Playwright locator strings to capture accessibility snapshots of multiple elements. Cannot be combined with locator parameter.
+  - Read-only: **true**
+
+<!-- NOTE: This has been generated via update-readme.js -->
+
 - **browser_evaluate**
   - Title: Evaluate JavaScript
   - Description: Evaluate JavaScript expression on page or element
@@ -464,12 +481,46 @@ http.createServer(async (req, res) => {
 
 <!-- NOTE: This has been generated via update-readme.js -->
 
+- **browser_evaluate**
+  - Title: Execute JavaScript
+  - Description: Execute JavaScript code in the browser context and return the result
+  - Parameters:
+    - `expression` (string): JavaScript expression or function to evaluate
+    - `args` (array, optional): Arguments to pass to the function (must be serializable)
+    - `awaitPromise` (boolean, optional): Whether to wait for promises to resolve
+    - `timeout` (number, optional): Maximum execution time in milliseconds
+  - Read-only: **false**
+
+<!-- NOTE: This has been generated via update-readme.js -->
+
 - **browser_file_upload**
   - Title: Upload files
   - Description: Upload one or multiple files
   - Parameters:
     - `paths` (array): The absolute paths to the files to upload. Can be a single file or multiple files.
   - Read-only: **false**
+
+<!-- NOTE: This has been generated via update-readme.js -->
+
+- **browser_get_html_content** 🆕
+  - Title: Get HTML content
+  - Description: Get HTML content of the current page or specific elements. Returns full page HTML by default, or HTML of specific elements when locator(s) provided.
+  - **Enhancement**: Extract HTML content from page or specific elements with flexible locator support
+  - Parameters:
+    - `locator` (string, optional): Playwright locator string to get HTML content of a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with locators parameter.
+    - `locators` (array, optional): Array of Playwright locator strings to get HTML content of multiple elements. Cannot be combined with locator parameter.
+  - Read-only: **true**
+
+<!-- NOTE: This has been generated via update-readme.js -->
+
+- **browser_get_outer_html** 🆕
+  - Title: Get outer HTML content
+  - Description: Get outer HTML content of specific elements (includes the element tag itself). Requires locator(s) to be specified.
+  - **Enhancement**: Get complete element HTML including the element tag itself
+  - Parameters:
+    - `locator` (string, optional): Playwright locator string to get outer HTML content of a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with locators parameter.
+    - `locators` (array, optional): Array of Playwright locator strings to get outer HTML content of multiple elements. Cannot be combined with locator parameter.
+  - Read-only: **true**
 
 <!-- NOTE: This has been generated via update-readme.js -->
 
@@ -559,20 +610,27 @@ http.createServer(async (req, res) => {
 - **browser_snapshot**
   - Title: Page snapshot
   - Description: Capture accessibility snapshot of the current page, this is better than screenshot
-  - Parameters: None
+  - Parameters:
+    - `page` (number, optional): Page number to retrieve when snapshot is truncated. Defaults to 1.
+    - `truncateSnapshot` (boolean, optional): Whether to truncate large snapshots at 20000 tokens. Defaults to true.
   - Read-only: **true**
 
 <!-- NOTE: This has been generated via update-readme.js -->
 
-- **browser_take_screenshot**
+- **browser_take_screenshot** ⭐
   - Title: Take a screenshot
   - Description: Take a screenshot of the current page. You can't perform actions based on the screenshot, use browser_snapshot for actions.
+  - **Enhancement**: Enhanced with fullPage and locator support for flexible screenshot capture
   - Parameters:
     - `raw` (boolean, optional): Whether to return without compression (in PNG format). Default is false, which returns a JPEG image.
     - `filename` (string, optional): File name to save the screenshot to. Defaults to `page-{timestamp}.{png|jpeg}` if not specified.
+    - `fullPage` (boolean, optional): Whether to take a screenshot of the full scrollable page. Cannot be combined with element/ref/locator parameters.
+    - `locator` (string, optional): Playwright locator string to screenshot a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with element/ref/fullPage parameters.
     - `element` (string, optional): Human-readable element description used to obtain permission to screenshot the element. If not provided, the screenshot will be taken of viewport. If element is provided, ref must be provided too.
     - `ref` (string, optional): Exact target element reference from the page snapshot. If not provided, the screenshot will be taken of viewport. If ref is provided, element must be provided too.
-    - `fullPage` (boolean, optional): When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Cannot be used with element screenshots.
+    - `format` (string, optional): Image format (defaults to png if raw is true, jpeg otherwise)
+    - `quality` (number, optional): JPEG quality (0-100), defaults to 50 for JPEG format
+    - `captureSnapshot` (boolean, optional): Whether to capture a page snapshot after taking the screenshot. Defaults to false.
   - Read-only: **true**
 
 <!-- NOTE: This has been generated via update-readme.js -->
@@ -597,6 +655,33 @@ http.createServer(async (req, res) => {
     - `time` (number, optional): The time to wait in seconds
     - `text` (string, optional): The text to wait for
     - `textGone` (string, optional): The text to wait for to disappear
+  - Read-only: **true**
+
+<!-- NOTE: This has been generated via update-readme.js -->
+
+- **get_video_path**
+  - Title: Get video path
+  - Description: Get the path to the video recording for the current or specified tab. Returns the video file path if recording is enabled.
+  - Parameters:
+    - `tabIndex` (number, optional): Tab index (1-based). If not provided, uses the current tab.
+  - Read-only: **true**
+
+<!-- NOTE: This has been generated via update-readme.js -->
+
+- **list_video_files**
+  - Title: List video files
+  - Description: List all video files in the output directory.
+  - Parameters: None
+  - Read-only: **true**
+
+<!-- NOTE: This has been generated via update-readme.js -->
+
+- **save_video**
+  - Title: Save video
+  - Description: Save the video recording for the current or specified tab to the output directory.
+  - Parameters:
+    - `tabIndex` (number, optional): Tab index (1-based). If not provided, uses the current tab.
+    - `filename` (string, optional): Custom filename for the saved video (without extension). If not provided, uses a default name.
   - Read-only: **true**
 
 </details>

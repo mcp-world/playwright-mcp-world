@@ -21,7 +21,6 @@ import evaluate from './tools/evaluate.js';
 import files from './tools/files.js';
 import html from './tools/html.js';
 import install from './tools/install.js';
-import javascript from './tools/javascript.js';
 import keyboard from './tools/keyboard.js';
 import navigate from './tools/navigate.js';
 import network from './tools/network.js';
@@ -44,7 +43,6 @@ export const allTools: Tool<any>[] = [
   ...files,
   ...html,
   ...install,
-  ...javascript,
   ...keyboard,
   ...navigate,
   ...network,
