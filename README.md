@@ -1,26 +1,6 @@
-# Playwright MCP World
+## Playwright MCP World 🌍 - Advanced Browser Automation
 
-## A Community-Driven Fork with Enhanced Features
-
-This is a community-maintained fork of the [Microsoft Playwright MCP](https://github.com/microsoft/playwright-mcp) server that includes additional features and improvements requested by the community but not yet included in the original project.
-
-### Why This Fork?
-
-Our goal is to provide a feature-rich Playwright MCP server that includes capabilities the community needs but which may not align with the original project's scope or priorities. As noted in [this discussion](https://github.com/microsoft/playwright-mcp/pull/448#issuecomment-2892276410), some features may be better suited for community-maintained versions.
-
-This fork serves as a testing ground for new features and a way to quickly deliver functionality that users need today.
-
-### Merged Community Contributions
-
-We've integrated features from several community forks:
-
-- **[viktor-silakov/playwright-mcp-advanced](https://github.com/viktor-silakov/playwright-mcp-advanced)** - Enhanced screenshot tools, HTML extraction, and element snapshots
-- **[nnamon/playwright-mcp](https://github.com/nnamon/playwright-mcp)** - JavaScript execution capabilities, Docker support, and improved build tooling
-- **[Verto-FX/playwright-mcp](https://github.com/Verto-FX/playwright-mcp)** - Video recording capabilities (see [#546](https://github.com/microsoft/playwright-mcp/issues/546), [#547](https://github.com/microsoft/playwright-mcp/pull/547))
-
-### About Playwright MCP
-
-A Model Context Protocol (MCP) server that provides browser automation capabilities using [Playwright](https://playwright.dev). This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models.
+An enhanced Model Context Protocol (MCP) server that provides browser automation capabilities using [Playwright](https://playwright.dev). This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models. **Includes stealth mode, video recording, HTML inspection tools, and more!**
 
 ### Key Features
 
@@ -28,40 +8,21 @@ A Model Context Protocol (MCP) server that provides browser automation capabilit
 - **LLM-friendly**. No vision models needed, operates purely on structured data.
 - **Deterministic tool application**. Avoids ambiguity common with screenshot-based approaches.
 
-### 🚀 Advanced Features
+### Enhanced Features 🚀
 
-This version includes additional tools not available in the original Playwright MCP:
+This advanced version includes additional capabilities:
 
-- **`browser_evaluate`** - Execute JavaScript code in the browser context
-- **`browser_take_screenshot`** - Enhanced screenshot tool with fullPage and locator support
-- **`browser_get_html_content`** - Extract HTML content from pages or specific elements
-- **`browser_get_outer_html`** - Get complete element HTML including the element tag
-- **`browser_element_snapshot`** - Capture accessibility snapshots of specific elements by locator
-- **`get_video_path`** - Get the path to video recordings for browser sessions
-- **`save_video`** - Save video recordings to the output directory with custom filenames
-- **`list_video_files`** - List all video files in the output directory
-
-### ⚠️ Experimental Notice
-
-This project is currently experimental and may be unstable due to the nature of integrating features from multiple community forks. If you encounter any bugs or issues, please [file an issue](https://github.com/mcp-world/playwright-mcp-world/issues) on GitHub to help us improve.
+- **🥷 Stealth Mode**: Integrated with playwright-extra and puppeteer-extra-plugin-stealth to avoid bot detection
+- **🎥 Video Recording**: Record browser sessions with configurable video settings
+- **📄 HTML Tools**: Get inner/outer HTML content from specific elements or entire pages
+- **💻 JavaScript Tools**: Enhanced JavaScript execution with better error handling
+- **📸 Enhanced Screenshot**: Support for full-page screenshots and element-specific captures
+- **🎯 Element Snapshots**: Get accessibility snapshots of specific elements using locators
+- **🐳 Docker Support**: Run in containerized environments with multiple browser options
 
 ### Requirements
 - Node.js 18 or newer
 - VS Code, Cursor, Windsurf, Claude Desktop, Goose or any other MCP client
-
-### Local Development Setup
-
-To use this version locally:
-
-1. **Clone and build the project:**
-   ```bash
-   git clone https://github.com/mcp-world/playwright-mcp-world.git
-   cd playwright-mcp-world
-   npm install
-   npm run build
-   ```
-
-2. **Configure your MCP client** to use the local build (see configuration examples below)
 
 <!--
 // Generate using:
@@ -70,9 +31,10 @@ node utils/generate-links.js
 
 ### Getting started
 
-First, install the Playwright MCP server with your client. 
+First, install the Playwright MCP server with your client.
 
-#### Using npm:
+**Standard config** works in most of the tools:
+
 ```js
 {
   "mcpServers": {
@@ -86,26 +48,88 @@ First, install the Playwright MCP server with your client.
 }
 ```
 
-#### For this advanced version (local development):
-```js
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "node",
-      "args": [
-        "/path/to/playwright-mcp-world/lib/index.js"
-      ]
-    }
-  }
-}
+[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D)
+
+
+<details>
+<summary>Claude Code</summary>
+
+Use the Claude Code CLI to add the Playwright MCP server:
+
+```bash
+claude mcp add playwright npx @mcp-world/playwright-mcp-world@latest
 ```
+</details>
 
-[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540mcp-world%252Fplaywright-mcp-world%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540mcp-world%252Fplaywright-mcp-world%2540latest%2522%255D%257D)
+<details>
+<summary>Claude Desktop</summary>
 
+Follow the MCP install [guide](https://modelcontextprotocol.io/quickstart/user), use the standard config above.
 
-<details><summary><b>Install in VS Code</b></summary>
+</details>
 
-You can also install the Playwright MCP server using the VS Code CLI:
+<details>
+<summary>Cursor</summary>
+
+#### Click the button to install:
+
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=playwright&config=eyJjb21tYW5kIjoibnB4IEBwbGF5d3JpZ2h0L21jcEBsYXRlc3QifQ%3D%3D)
+
+#### Or install manually:
+
+Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Name to your liking, use `command` type with the command `npx @mcp-world/playwright-mcp-world`. You can also verify config or add command like arguments via clicking `Edit`.
+
+</details>
+
+<details>
+<summary>Gemini CLI</summary>
+
+Follow the MCP install [guide](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md#configure-the-mcp-server-in-settingsjson), use the standard config above.
+
+</details>
+
+<details>
+<summary>Goose</summary>
+
+#### Click the button to install:
+
+[![Install in Goose](https://block.github.io/goose/img/extension-install-dark.svg)](https://block.github.io/goose/extension?cmd=npx&arg=%40playwright%2Fmcp%40latest&id=playwright&name=Playwright&description=Interact%20with%20web%20pages%20through%20structured%20accessibility%20snapshots%20using%20Playwright)
+
+#### Or install manually:
+
+Go to `Advanced settings` -> `Extensions` -> `Add custom extension`. Name to your liking, use type `STDIO`, and set the `command` to `npx @mcp-world/playwright-mcp-world`. Click "Add Extension".
+</details>
+
+<details>
+<summary>LM Studio</summary>
+
+#### Click the button to install:
+
+[![Add MCP Server playwright to LM Studio](https://files.lmstudio.ai/deeplink/mcp-install-light.svg)](https://lmstudio.ai/install-mcp?name=playwright&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyJAcGxheXdyaWdodC9tY3BAbGF0ZXN0Il19)
+
+#### Or install manually:
+
+Go to `Program` in the right sidebar -> `Install` -> `Edit mcp.json`. Use the standard config above.
+</details>
+
+<details>
+<summary>Qodo Gen</summary>
+
+Open [Qodo Gen](https://docs.qodo.ai/qodo-documentation/qodo-gen) chat panel in VSCode or IntelliJ → Connect more tools → + Add new MCP → Paste the standard config above.
+
+Click <code>Save</code>.
+</details>
+
+<details>
+<summary>VS Code</summary>
+
+#### Click the button to install:
+
+[<img src="https://img.shields.io/badge/VS_Code-VS_Code?style=flat-square&label=Install%20Server&color=0098FF" alt="Install in VS Code">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D) [<img alt="Install in VS Code Insiders" src="https://img.shields.io/badge/VS_Code_Insiders-VS_Code_Insiders?style=flat-square&label=Install%20Server&color=24bfa5">](https://insiders.vscode.dev/redirect?url=vscode-insiders%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522playwright%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522%2540playwright%252Fmcp%2540latest%2522%255D%257D)
+
+#### Or install manually:
+
+Follow the MCP install [guide](https://code.visualstudio.com/docs/copilot/chat/mcp-servers#_add-an-mcp-server), use the standard config above. You can also install the Playwright MCP server using the VS Code CLI:
 
 ```bash
 # For VS Code
@@ -116,165 +140,17 @@ After installation, the Playwright MCP server will be available for use with you
 </details>
 
 <details>
-<summary><b>Install in Cursor</b></summary>
+<summary>Windsurf</summary>
 
-#### For original Playwright MCP:
+Follow Windsurf MCP [documentation](https://docs.windsurf.com/windsurf/cascade/mcp). Use the standard config above.
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=playwright&config=eyJjb21tYW5kIjoibnB4IEBwbGF5d3JpZ2h0L21jcEBsYXRlc3QifQ%3D%3D)
-
-Or install manually: Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Name to your liking, use `command` type with the command `npx @mcp-world/playwright-mcp-world`.
-
-```js
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@mcp-world/playwright-mcp-world@latest"
-      ]
-    }
-  }
-}
-```
-
-#### For this advanced version (local):
-
-Go to `Cursor Settings` -> `MCP` -> `Add new MCP Server`. Use the following configuration:
-
-```js
-{
-  "mcpServers": {
-    "playwright-advanced": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/playwright-mcp-world/lib/index.js"
-      ]
-    }
-  }
-}
-```
-</details>
-
-<details>
-<summary><b>Install in Windsurf</b></summary>
-
-Follow Windsurf MCP [documentation](https://docs.windsurf.com/windsurf/cascade/mcp). Use following configuration:
-
-```js
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@mcp-world/playwright-mcp-world@latest"
-      ]
-    }
-  }
-}
-```
-</details>
-
-<details>
-<summary><b>Install in Claude Desktop</b></summary>
-
-Follow the MCP install [guide](https://modelcontextprotocol.io/quickstart/user).
-
-#### For original Playwright MCP:
-```js
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@mcp-world/playwright-mcp-world@latest"
-      ]
-    }
-  }
-}
-```
-
-#### For this advanced version (local):
-```js
-{
-  "mcpServers": {
-    "playwright-advanced": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/playwright-mcp-world/lib/index.js"
-      ]
-    }
-  }
-}
-```
-</details>
-
-<details>
-<summary><b>Install in Claude Code</b></summary>
-
-Use the Claude Code CLI to add the Playwright MCP server:
-
-```bash
-claude mcp add playwright npx @playwright/mcp@latest
-```
-</details>
-
-<details>
-<summary><b>Install in Goose</b></summary>
-
-#### Click the button to install:
-
-[![Install in Goose](https://block.github.io/goose/img/extension-install-dark.svg)](https://block.github.io/goose/extension?cmd=npx&arg=%40playwright%2Fmcp%40latest&id=playwright&name=Playwright&description=Interact%20with%20web%20pages%20through%20structured%20accessibility%20snapshots%20using%20Playwright)
-
-#### Or install manually:
-
-Go to `Advanced settings` -> `Extensions` -> `Add custom extension`. Name to your liking, use type `STDIO`, and set the `command` to `npx @playwright/mcp`. Click "Add Extension".
-</details>
-
-<details>
-<summary><b>Install in Qodo Gen</b></summary>
-
-Open [Qodo Gen](https://docs.qodo.ai/qodo-documentation/qodo-gen) chat panel in VSCode or IntelliJ → Connect more tools → + Add new MCP → Paste the following configuration:
-
-```js
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@mcp-world/playwright-mcp-world@latest"
-      ]
-    }
-  }
-}
-```
-
-Click <code>Save</code>.
-</details>
-
-<details>
-<summary><b>Install in Gemini CLI</b></summary>
-
-Follow the MCP install [guide](https://github.com/google-gemini/gemini-cli/blob/main/docs/tools/mcp-server.md#configure-the-mcp-server-in-settingsjson), use following configuration:
-
-```js
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@playwright/mcp@latest"
-      ]
-    }
-  }
-}
-```
 </details>
 
 ### Configuration
 
 Playwright MCP server supports following arguments. They can be provided in the JSON configuration above, as a part of the `"args"` list:
 
-<!--- Options generated by update-readme.ts -->
+<!--- Options generated by update-readme.js -->
 
 ```
 > npx @mcp-world/playwright-mcp-world@latest --help
@@ -310,9 +186,8 @@ Playwright MCP server supports following arguments. They can be provided in the 
                                example ".com,chromium.org,.domain.com"
   --proxy-server <proxy>       specify proxy server, for example
                                "http://myproxy:3128" or "socks5://myproxy:8080"
-  --record-video <mode>        record video mode: "off", "on",
-                               "retain-on-failure", or "on-first-retry"
-  --record-video-size <size>   video size in pixels, for example "800,600"
+  --save-session               Whether to save the Playwright MCP session into
+                               the output directory.
   --save-trace                 Whether to save the Playwright Trace of the
                                session into the output directory.
   --storage-state <path>       path to the storage state file for isolated
@@ -409,13 +284,6 @@ npx @mcp-world/playwright-mcp-world@latest --config path/to/config.json
       // ... other Playwright context options
     };
 
-    // Video recording configuration
-    // @see https://playwright.dev/docs/videos
-    recordVideo?: {
-      mode: 'off' | 'on' | 'retain-on-failure' | 'on-first-retry';
-      size?: { width: number, height: number };
-    };
-
     // CDP endpoint for connecting to existing browser
     cdpEndpoint?: string;
 
@@ -461,19 +329,19 @@ npx @mcp-world/playwright-mcp-world@latest --config path/to/config.json
 ### Standalone MCP server
 
 When running headed browser on system w/o display or from worker processes of the IDEs,
-run the MCP server from environment with the DISPLAY and pass the `--port` flag to enable SSE transport.
+run the MCP server from environment with the DISPLAY and pass the `--port` flag to enable HTTP transport.
 
 ```bash
 npx @mcp-world/playwright-mcp-world@latest --port 8931
 ```
 
-And then in MCP client config, set the `url` to the SSE endpoint:
+And then in MCP client config, set the `url` to the HTTP endpoint:
 
 ```js
 {
   "mcpServers": {
     "playwright": {
-      "url": "http://localhost:8931/sse"
+      "url": "http://localhost:8931/mcp"
     }
   }
 }
@@ -489,7 +357,7 @@ And then in MCP client config, set the `url` to the SSE endpoint:
   "mcpServers": {
     "playwright": {
       "command": "docker",
-      "args": ["run", "-i", "--rm", "--init", "--pull=always", "playwright-mcp"]
+      "args": ["run", "-i", "--rm", "--init", "--pull=always", "mcr.microsoft.com/playwright/mcp"]
     }
   }
 }
@@ -498,7 +366,7 @@ And then in MCP client config, set the `url` to the SSE endpoint:
 You can build the Docker image yourself.
 
 ```
-docker build -t playwright-mcp .
+docker build -t mcr.microsoft.com/playwright/mcp .
 ```
 </details>
 
@@ -524,69 +392,14 @@ http.createServer(async (req, res) => {
 ```
 </details>
 
-
 ### Tools
 
-<<<<<<< HEAD
-The tools are available in two modes:
-
-1. **Snapshot Mode** (default): Uses accessibility snapshots for better performance and reliability
-2. **Vision Mode**: Uses screenshots for visual-based interactions
-
-To use Vision Mode, add the `--vision` flag when starting the server:
-
-```js
-{
-  "mcpServers": {
-    "playwright": {
-      "command": "npx",
-      "args": [
-        "@mcp-world/playwright-mcp-world@latest",
-        "--vision"
-      ]
-    }
-  }
-}
-```
-
-Vision Mode works best with the computer use models that are able to interact with elements using
-X Y coordinate space, based on the provided screenshot.
-
-**Note:** All HTML content extraction tools (`browser_get_html_content`, `browser_get_outer_html`) are also available in Vision Mode, providing the same functionality regardless of the mode used.
-
-<!--- Tools generated by update-readme.ts -->
-
-<details>
-<summary><b>Interactions</b></summary>
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_snapshot**
-  - Title: Page snapshot
-  - Description: Capture accessibility snapshot of the current page, this is better than screenshot
-  - Parameters:
-    - `truncateSnapshot` (boolean, optional): Whether to truncate large snapshots at 20000 tokens. Defaults to true.
-    - `page` (number, optional): Page number to retrieve when snapshot is truncated. Defaults to 1.
-  - Read-only: **true**
-=======
 <!--- Tools generated by update-readme.js -->
 
 <details>
 <summary><b>Core automation</b></summary>
->>>>>>> d61aa16
 
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_element_snapshot** 🆕
-  - Title: Element snapshot
-  - Description: Capture accessibility snapshot of specific elements by locator(s). Better than screenshot for specific elements.
-  - **Enhancement**: Capture structured accessibility data for specific elements using locators
-  - Parameters:
-    - `locator` (string, optional): Playwright locator string to capture accessibility snapshot of a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with locators parameter.
-    - `locators` (array, optional): Array of Playwright locator strings to capture accessibility snapshots of multiple elements. Cannot be combined with locator parameter.
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_click**
   - Title: Click
@@ -595,9 +408,10 @@ X Y coordinate space, based on the provided screenshot.
     - `element` (string): Human-readable element description used to obtain permission to interact with the element
     - `ref` (string): Exact target element reference from the page snapshot
     - `doubleClick` (boolean, optional): Whether to perform a double click instead of a single click
+    - `button` (string, optional): Button to click, defaults to left
   - Read-only: **false**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_close**
   - Title: Close browser
@@ -625,71 +439,19 @@ X Y coordinate space, based on the provided screenshot.
     - `endRef` (string): Exact target element reference from the page snapshot
   - Read-only: **false**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_evaluate**
   - Title: Evaluate JavaScript
   - Description: Evaluate JavaScript expression on page or element
   - Parameters:
-<<<<<<< HEAD
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `ref` (string): Exact target element reference from the page snapshot
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_type**
-  - Title: Type text
-  - Description: Type text into editable element
-  - Parameters:
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `ref` (string): Exact target element reference from the page snapshot
-    - `text` (string): Text to type into the element
-    - `submit` (boolean, optional): Whether to submit entered text (press Enter after)
-    - `slowly` (boolean, optional): Whether to type one character at a time. Useful for triggering key handlers in the page. By default entire text is filled in at once.
-=======
     - `function` (string): () => { /* code */ } or (element) => { /* code */ } when element is provided
     - `element` (string, optional): Human-readable element description used to obtain permission to interact with the element
     - `ref` (string, optional): Exact target element reference from the page snapshot
->>>>>>> d61aa16
   - Read-only: **false**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
-<<<<<<< HEAD
-- **browser_select_option**
-  - Title: Select option
-  - Description: Select an option in a dropdown
-  - Parameters:
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `ref` (string): Exact target element reference from the page snapshot
-    - `values` (array): Array of values to select in the dropdown. This can be a single value or multiple values.
-  - Read-only: **false**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_press_key**
-  - Title: Press a key
-  - Description: Press a key on the keyboard
-  - Parameters:
-    - `key` (string): Name of the key to press or a character to generate, such as `ArrowLeft` or `a`
-  - Read-only: **false**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_wait_for**
-  - Title: Wait for
-  - Description: Wait for text to appear or disappear or a specified time to pass
-  - Parameters:
-    - `time` (number, optional): The time to wait in seconds
-    - `text` (string, optional): The text to wait for
-    - `textGone` (string, optional): The text to wait for to disappear
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-=======
->>>>>>> d61aa16
 - **browser_file_upload**
   - Title: Upload files
   - Description: Upload one or multiple files
@@ -697,7 +459,7 @@ X Y coordinate space, based on the provided screenshot.
     - `paths` (array): The absolute paths to the files to upload. Can be a single file or multiple files.
   - Read-only: **false**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_handle_dialog**
   - Title: Handle a dialog
@@ -717,7 +479,7 @@ X Y coordinate space, based on the provided screenshot.
     - `ref` (string): Exact target element reference from the page snapshot
   - Read-only: **true**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_navigate**
   - Title: Navigate to a URL
@@ -726,7 +488,7 @@ X Y coordinate space, based on the provided screenshot.
     - `url` (string): The URL to navigate to
   - Read-only: **false**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_navigate_back**
   - Title: Go back
@@ -734,7 +496,7 @@ X Y coordinate space, based on the provided screenshot.
   - Parameters: None
   - Read-only: **true**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_navigate_forward**
   - Title: Go forward
@@ -788,150 +550,37 @@ X Y coordinate space, based on the provided screenshot.
   - Parameters: None
   - Read-only: **true**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
-- **browser_take_screenshot** ⭐
+- **browser_take_screenshot**
   - Title: Take a screenshot
   - Description: Take a screenshot of the current page. You can't perform actions based on the screenshot, use browser_snapshot for actions.
-  - **Enhancement**: Enhanced with fullPage and locator support for flexible screenshot capture
   - Parameters:
     - `raw` (boolean, optional): Whether to return without compression (in PNG format). Default is false, which returns a JPEG image.
     - `filename` (string, optional): File name to save the screenshot to. Defaults to `page-{timestamp}.{png|jpeg}` if not specified.
-    - `fullPage` (boolean, optional): Whether to take a screenshot of the full scrollable page. Cannot be combined with element/ref/locator parameters.
-    - `locator` (string, optional): Playwright locator string to screenshot a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with element/ref/fullPage parameters.
     - `element` (string, optional): Human-readable element description used to obtain permission to screenshot the element. If not provided, the screenshot will be taken of viewport. If element is provided, ref must be provided too.
     - `ref` (string, optional): Exact target element reference from the page snapshot. If not provided, the screenshot will be taken of viewport. If ref is provided, element must be provided too.
-    - `format` (string, optional): Image format (defaults to png if raw is true, jpeg otherwise)
-    - `quality` (number, optional): JPEG quality (0-100), defaults to 50 for JPEG format
-    - `captureSnapshot` (boolean, optional): Whether to capture a page snapshot after taking the screenshot. Defaults to false.
+    - `fullPage` (boolean, optional): When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Cannot be used with element screenshots.
   - Read-only: **true**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_type**
   - Title: Type text
   - Description: Type text into editable element
   - Parameters:
-<<<<<<< HEAD
-    - `filename` (string, optional): File name to save the pdf to. Defaults to `page-{timestamp}.pdf` if not specified.
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **get_video_path**
-  - Title: Get video path
-  - Description: Get the path to the video recording for the current or specified tab. Returns the video file path if recording is enabled.
-  - Parameters:
-    - `tabIndex` (number, optional): Tab index (1-based). If not provided, uses the current tab.
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **save_video**
-  - Title: Save video
-  - Description: Save the video recording for the current or specified tab to the output directory.
-  - Parameters:
-    - `tabIndex` (number, optional): Tab index (1-based). If not provided, uses the current tab.
-    - `filename` (string, optional): Custom filename for the saved video (without extension). If not provided, uses a default name.
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **list_video_files**
-  - Title: List video files
-  - Description: List all video files in the output directory.
-  - Parameters: None
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_network_requests**
-  - Title: List network requests
-  - Description: Returns all network requests since loading the page
-  - Parameters: None
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_console_messages**
-  - Title: Get console messages
-  - Description: Returns all console messages
-  - Parameters: None
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_get_html_content** 🆕
-  - Title: Get HTML content
-  - Description: Get HTML content of the current page or specific elements. Returns full page HTML by default, or HTML of specific elements when locator(s) provided.
-  - **Enhancement**: Extract HTML content from page or specific elements with flexible locator support
-  - Parameters:
-    - `locator` (string, optional): Playwright locator string to get HTML content of a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with locators parameter.
-    - `locators` (array, optional): Array of Playwright locator strings to get HTML content of multiple elements. Cannot be combined with locator parameter.
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_get_outer_html** 🆕
-  - Title: Get outer HTML content
-  - Description: Get outer HTML content of specific elements (includes the element tag itself). Requires locator(s) to be specified.
-  - **Enhancement**: Get complete element HTML including the element tag itself
-  - Parameters:
-    - `locator` (string, optional): Playwright locator string to get outer HTML content of a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with locators parameter.
-    - `locators` (array, optional): Array of Playwright locator strings to get outer HTML content of multiple elements. Cannot be combined with locator parameter.
-  - Read-only: **true**
-
-</details>
-
-<details>
-<summary><b>Utilities</b></summary>
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_install**
-  - Title: Install the browser specified in the config
-  - Description: Install the browser specified in the config. Call this if you get an error about the browser not being installed.
-  - Parameters: None
-=======
     - `element` (string): Human-readable element description used to obtain permission to interact with the element
     - `ref` (string): Exact target element reference from the page snapshot
     - `text` (string): Text to type into the element
     - `submit` (boolean, optional): Whether to submit entered text (press Enter after)
     - `slowly` (boolean, optional): Whether to type one character at a time. Useful for triggering key handlers in the page. By default entire text is filled in at once.
->>>>>>> d61aa16
   - Read-only: **false**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
-- **browser_evaluate**
-  - Title: Execute JavaScript
-  - Description: Execute JavaScript code in the browser context and return the result
-  - Parameters:
-    - `expression` (string): JavaScript expression or function to evaluate
-    - `args` (array, optional): Arguments to pass to the function (must be serializable)
-    - `awaitPromise` (boolean, optional): Whether to wait for promises to resolve
-    - `timeout` (number, optional): Maximum execution time in milliseconds
-  - Read-only: **false**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-<<<<<<< HEAD
-- **browser_close**
-  - Title: Close browser
-  - Description: Close the page
-  - Parameters: None
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_resize**
-  - Title: Resize browser window
-  - Description: Resize the browser window
-=======
 - **browser_wait_for**
   - Title: Wait for
   - Description: Wait for text to appear or disappear or a specified time to pass
->>>>>>> d61aa16
   - Parameters:
     - `time` (number, optional): The time to wait in seconds
     - `text` (string, optional): The text to wait for
@@ -952,7 +601,7 @@ X Y coordinate space, based on the provided screenshot.
     - `index` (number, optional): The index of the tab to close. Closes current tab if not provided.
   - Read-only: **false**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_tab_list**
   - Title: List tabs
@@ -960,7 +609,7 @@ X Y coordinate space, based on the provided screenshot.
   - Parameters: None
   - Read-only: **true**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_tab_new**
   - Title: Open a new tab
@@ -969,7 +618,7 @@ X Y coordinate space, based on the provided screenshot.
     - `url` (string, optional): The URL to navigate to in the new tab. If not provided, the new tab will be blank.
   - Read-only: **true**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_tab_select**
   - Title: Select a tab
@@ -978,16 +627,12 @@ X Y coordinate space, based on the provided screenshot.
     - `index` (number): The index of the tab to select
   - Read-only: **true**
 
-<<<<<<< HEAD
-<!-- NOTE: This has been generated via update-readme.ts -->
-=======
 </details>
 
 <details>
 <summary><b>Browser installation</b></summary>
 
 <!-- NOTE: This has been generated via update-readme.js -->
->>>>>>> d61aa16
 
 - **browser_install**
   - Title: Install the browser specified in the config
@@ -1000,36 +645,9 @@ X Y coordinate space, based on the provided screenshot.
 <details>
 <summary><b>Coordinate-based (opt-in via --caps=vision)</b></summary>
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
-<<<<<<< HEAD
-- **browser_screen_capture** ⭐
-  - Title: Take a screenshot
-  - Description: Take a screenshot of the current page
-  - **Enhancement**: Enhanced with fullPage and locator/locators support for flexible vision mode capture
-  - Parameters:
-    - `fullPage` (boolean, optional): Whether to take a screenshot of the full scrollable page. Cannot be combined with locator/locators parameters.
-    - `locator` (string, optional): Playwright locator string to screenshot a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with fullPage/locators parameters.
-    - `locators` (array, optional): Array of Playwright locator strings to screenshot multiple elements. Cannot be combined with fullPage/locator parameters.
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_screen_move_mouse**
-  - Title: Move mouse
-  - Description: Move mouse to a given position
-  - Parameters:
-    - `element` (string): Human-readable element description used to obtain permission to interact with the element
-    - `x` (number): X coordinate
-    - `y` (number): Y coordinate
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_screen_click**
-=======
 - **browser_mouse_click_xy**
->>>>>>> d61aa16
   - Title: Click
   - Description: Click left mouse button at a given position
   - Parameters:
@@ -1038,7 +656,7 @@ X Y coordinate space, based on the provided screenshot.
     - `y` (number): Y coordinate
   - Read-only: **false**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_mouse_drag_xy**
   - Title: Drag mouse
@@ -1051,79 +669,29 @@ X Y coordinate space, based on the provided screenshot.
     - `endY` (number): End Y coordinate
   - Read-only: **false**
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_mouse_move_xy**
   - Title: Move mouse
   - Description: Move mouse to a given position
   - Parameters:
-<<<<<<< HEAD
-    - `text` (string): Text to type into the element
-    - `submit` (boolean, optional): Whether to submit entered text (press Enter after)
-  - Read-only: **false**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_press_key**
-  - Title: Press a key
-  - Description: Press a key on the keyboard
-  - Parameters:
-    - `key` (string): Name of the key to press or a character to generate, such as `ArrowLeft` or `a`
-  - Read-only: **false**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_wait_for**
-  - Title: Wait for
-  - Description: Wait for text to appear or disappear or a specified time to pass
-  - Parameters:
-    - `time` (number, optional): The time to wait in seconds
-    - `text` (string, optional): The text to wait for
-    - `textGone` (string, optional): The text to wait for to disappear
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-=======
     - `element` (string): Human-readable element description used to obtain permission to interact with the element
     - `x` (number): X coordinate
     - `y` (number): Y coordinate
   - Read-only: **true**
 
 </details>
->>>>>>> d61aa16
 
 <details>
 <summary><b>PDF generation (opt-in via --caps=pdf)</b></summary>
 
-<!-- NOTE: This has been generated via update-readme.ts -->
+<!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_pdf_save**
   - Title: Save as PDF
   - Description: Save page as PDF
   - Parameters:
     - `filename` (string, optional): File name to save the pdf to. Defaults to `page-{timestamp}.pdf` if not specified.
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_get_html_content** 🆕
-  - Title: Get HTML content
-  - Description: Get HTML content of the current page or specific elements. Returns full page HTML by default, or HTML of specific elements when locator(s) provided.
-  - **Enhancement**: Extract HTML content from page or specific elements with flexible locator support
-  - Parameters:
-    - `locator` (string, optional): Playwright locator string to get HTML content of a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with locators parameter.
-    - `locators` (array, optional): Array of Playwright locator strings to get HTML content of multiple elements. Cannot be combined with locator parameter.
-  - Read-only: **true**
-
-<!-- NOTE: This has been generated via update-readme.ts -->
-
-- **browser_get_outer_html** 🆕
-  - Title: Get outer HTML content
-  - Description: Get outer HTML content of specific elements (includes the element tag itself). Requires locator(s) to be specified.
-  - **Enhancement**: Get complete element HTML including the element tag itself
-  - Parameters:
-    - `locator` (string, optional): Playwright locator string to get outer HTML content of a specific element (e.g., "#id", ".class", "text=Hello"). Cannot be combined with locators parameter.
-    - `locators` (array, optional): Array of Playwright locator strings to get outer HTML content of multiple elements. Cannot be combined with locator parameter.
   - Read-only: **true**
 
 </details>
