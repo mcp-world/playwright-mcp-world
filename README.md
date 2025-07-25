@@ -463,9 +463,10 @@ npx @mcp-world/playwright-mcp-world@latest --config path/to/config.json
   };
  
   /**
-   * Do not send image responses to the client.
+   * Whether to send image responses to the client. Can be "allow", "omit", or "auto". 
+   * Defaults to "auto", images are omitted for Cursor clients and sent for all other clients.
    */
-  noImageResponses?: boolean;
+  imageResponses?: 'allow' | 'omit' | 'auto';
 }
 ```
 </details>
