@@ -33,7 +33,7 @@ const screenshotSchema = z.object({
   ref: z.string().optional().describe('Exact target element reference from the page snapshot. If not provided, the screenshot will be taken of viewport. If ref is provided, element must be provided too.'),
   format: z.enum(['png', 'jpeg']).optional().describe('Image format (defaults to png if raw is true, jpeg otherwise)'),
   quality: z.number().min(0).max(100).optional().describe('JPEG quality (0-100), defaults to 50 for JPEG format'),
-  captureSnapshot: z.boolean().optional().describe('Whether to capture a page snapshot after taking the screenshot. Defaults to false.'),
+  captureSnapshot: z.boolean().optional().describe('Whether to capture a page snapshot after taking the screenshot. Defaults to false.')
 }).refine(data => {
   return !!data.element === !!data.ref;
 }, {
@@ -42,7 +42,7 @@ const screenshotSchema = z.object({
 }).refine(data => {
   return !(data.fullPage && (data.element || data.ref || data.locator));
 }, {
-  message: 'fullPage cannot be combined with element/ref/locator parameters.',
+  message: 'fullPage cannot be used with element screenshots.',
   path: ['fullPage']
 }).refine(data => {
   return !(data.locator && (data.element || data.ref || data.fullPage));
@@ -85,7 +85,7 @@ const screenshot = defineTool({
       quality,
       scale: 'css',
       path: fileName,
-      fullPage: params.fullPage || false
+      ...(params.fullPage !== undefined && { fullPage: params.fullPage })
     };
     const isElementScreenshot = params.element && params.ref;
     const isLocatorScreenshot = params.locator;
@@ -98,8 +98,9 @@ const screenshot = defineTool({
     else if (params.fullPage)
       screenshotType = 'full page';
 
+    const screenshotTarget = isElementScreenshot ? params.element : (isLocatorScreenshot ? `element(s) by locator "${params.locator}"` : screenshotType);
     const code = [
-      `// Screenshot ${isElementScreenshot ? params.element : (isLocatorScreenshot ? `element(s) by locator "${params.locator}"` : screenshotType)} and save it as ${fileName}`,
+      `// Screenshot ${screenshotTarget} and save it as ${fileName}`,
     ];
 
     let locator = null;
