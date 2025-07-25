@@ -53,24 +53,23 @@ test('browser_take_screenshot (element)', async ({ startClient, server }, testIn
     arguments: { url: server.HELLO_WORLD },
   })).toContainTextContent(`[ref=e1]`);
 
-  expect(await client.callTool({
+  const result = await client.callTool({
     name: 'browser_take_screenshot',
     arguments: {
       element: 'hello button',
       ref: 'e1',
     },
-  })).toEqual({
-    content: [
-      {
-        text: expect.stringContaining(`page.getByText('Hello, world!').screenshot`),
-        type: 'text',
-      },
-      {
-        data: expect.any(String),
-        mimeType: 'image/jpeg',
-        type: 'image',
-      },
-    ],
+  });
+  
+  expect(result.content).toHaveLength(2);
+  expect(result.content[0]).toEqual({
+    text: expect.stringContaining(`getByText('Hello, world!').screenshot`),
+    type: 'text',
+  });
+  expect(result.content[1]).toEqual({
+    data: expect.any(String),
+    mimeType: 'image/jpeg',
+    type: 'image',
   });
 });
 

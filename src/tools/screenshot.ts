@@ -115,7 +115,7 @@ const screenshot = defineTabTool({
     if (params.captureSnapshot)
       response.setIncludeSnapshot();
 
-    await tab.run(async () => {
+    await tab.waitForCompletion(async () => {
       if (params.locator) {
         const locatorElement = tab.page.locator(params.locator);
         const elements = await locatorElement.all();
@@ -149,7 +149,7 @@ const screenshot = defineTabTool({
           data: buffer
         });
       }
-    }, response);
+    });
   }
 });
 
