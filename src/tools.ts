@@ -34,6 +34,7 @@ import wait from './tools/wait.js';
 import mouse from './tools/mouse.js';
 
 import type { Tool } from './tools/tool.js';
+import type { FullConfig } from './config.js';
 
 export const allTools: Tool<any>[] = [
   ...common,
@@ -55,3 +56,7 @@ export const allTools: Tool<any>[] = [
   ...video,
   ...wait,
 ];
+
+export function filteredTools(config: FullConfig) {
+  return allTools.filter(tool => tool.capability.startsWith('core') || config.capabilities?.includes(tool.capability));
+}
