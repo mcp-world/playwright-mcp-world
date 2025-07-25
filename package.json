@@ -22,9 +22,11 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc",
+    "build:extension": "tsc --project extension",
     "lint": "npm run update-readme && eslint . && tsc --noEmit",
     "update-readme": "node utils/update-readme.js",
     "watch": "tsc --watch",
+    "watch:extension": "tsc --watch --project extension",
     "test": "playwright test --workers=5",
     "ctest": "playwright test --project=chrome",
     "ftest": "playwright test --project=firefox",
@@ -36,7 +38,7 @@
     "docker:test": "make docker-test",
     "docker:server": "make docker-server",
     "docker:cleanup": "make docker-cleanup",
-    "clean": "rm -rf lib",
+    "clean": "rm -rf lib extension/lib",
     "release": "npm run clean && npm run update-readme && npm run build && npm run test && release-it  --increment",
     "npm-publish": "npm run clean && npm run build && npm run test && npm publish"
   },
@@ -48,7 +50,7 @@
     }
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.11.0",
+    "@modelcontextprotocol/sdk": "^1.16.0",
     "commander": "^13.1.0",
     "debug": "^4.4.1",
     "mime": "^4.0.7",
