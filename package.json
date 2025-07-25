@@ -32,15 +32,16 @@
     "ftest": "playwright test --project=firefox",
     "wtest": "playwright test --project=webkit",
     "etest": "playwright test --project=chromium-extension",
-    "run-server": "tsx src/browserServer.ts",
+    "run-server": "node lib/browserServer.js",
     "dev": "mcp-server-playwright",
     "dev-watch": "tsx watch src/program.ts",
     "docker:build": "make docker-build",
     "docker:test": "make docker-test",
     "docker:server": "make docker-server",
     "docker:cleanup": "make docker-cleanup",
-    "clean": "rm -rf lib",
-    "release": "npm run clean && npm run update-readme && npm run build && npm run test && release-it  --increment"
+    "clean": "rm -rf lib && rm -rf extension/lib",
+    "release": "npm run clean && npm run update-readme && npm run build && npm run test && release-it  --increment",
+    "npm-publish": "npm run clean && npm run build && npm run test && npm publish"
   },
   "exports": {
     "./package.json": "./package.json",
