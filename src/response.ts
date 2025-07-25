@@ -25,6 +25,7 @@ export class Response {
   private _includeSnapshot = false;
   private _includeTabs = false;
   private _snapshot: string | undefined;
+  private _truncateParams: { maxTokens: number; pageNum?: number } | undefined;
 
   readonly toolName: string;
   readonly toolArgs: Record<string, any>;
@@ -67,37 +68,21 @@ export class Response {
     this._includeTabs = true;
   }
   
-  setCustomSnapshot(snapshot: string) {
-    this._snapshot = snapshot;
-    this._includeSnapshot = true;
+  setTruncateParams(params: { maxTokens: number; pageNum?: number }) {
+    this._truncateParams = params;
   }
 
   async snapshot(): Promise<string> {
     if (this._snapshot !== undefined)
       return this._snapshot;
     if (this._includeSnapshot && this._context.currentTab())
-      this._snapshot = await this._context.currentTabOrDie().captureSnapshot();
+      this._snapshot = await this._context.currentTabOrDie().captureSnapshot(this._truncateParams);
     else
       this._snapshot = '';
     return this._snapshot;
   }
 
   async serialize(): Promise<{ content: (TextContent | ImageContent)[] }> {
-    // If we have a custom snapshot and no other content, return just the snapshot
-    if (this._snapshot !== undefined && this._result.length === 0 && this._code.length === 0) {
-      const content: (TextContent | ImageContent)[] = [
-        { type: 'text', text: this._snapshot },
-      ];
-      
-      // Image attachments.
-      if (this._context.config.imageResponses !== 'omit') {
-        for (const image of this._images)
-          content.push({ type: 'image', data: image.data.toString('base64'), mimeType: image.contentType });
-      }
-      
-      return { content };
-    }
-    
     const response: string[] = [];
 
     // Start with command result.
