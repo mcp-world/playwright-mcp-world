@@ -216,4 +216,39 @@ test.describe('truncateSnapshot', () => {
     expect(textContent).toContain('Page Snapshot');
     expect(textContent).toMatch(/Page \d+ of \d+/);
   });
+
+  test.skip('browser_navigate with real URL should truncate', async ({ startClient }) => {
+    // Start client with default truncation (20000 tokens)
+    const { client } = await startClient();
+    
+    const result = await client.callTool({
+      name: 'browser_navigate',
+      arguments: { url: 'https://theredocs.com/signup/login' }
+    });
+
+    const textContent = result.content.map((c: any) => c.text).join('\n');
+    console.log('Result length:', textContent.length);
+    console.log('Estimated tokens:', textContent.length / 4);
+    
+    // Should contain page info
+    expect(textContent).toContain('Page state');
+    expect(textContent).toContain('ログイン | クラウド賃貸管理ソフトのリドックス');
+    
+    // Check if truncation is working
+    const hasPageInfo = textContent.includes('Page Snapshot (Page 1 of');
+    console.log('Has page info:', hasPageInfo);
+    
+    if (hasPageInfo) {
+      const pageMatch = textContent.match(/Page Snapshot \(Page 1 of (\d+)\)/);
+      console.log('Page match:', pageMatch);
+    }
+    
+    // Log a sample of the snapshot to see what's happening
+    const snapshotStart = textContent.indexOf('```yaml');
+    const snapshotEnd = textContent.indexOf('```', snapshotStart + 7);
+    if (snapshotStart !== -1 && snapshotEnd !== -1) {
+      const snapshotContent = textContent.substring(snapshotStart, snapshotEnd + 3);
+      console.log('Snapshot preview (first 500 chars):', snapshotContent.substring(0, 500));
+    }
+  });
 });

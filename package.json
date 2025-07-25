@@ -55,6 +55,7 @@
     "commander": "^13.1.0",
     "debug": "^4.4.1",
     "dotenv": "^17.2.0",
+    "js-tiktoken": "^1.0.20",
     "mime": "^4.0.7",
     "playwright": "1.55.0-alpha-1752701791000",
     "playwright-core": "1.55.0-alpha-1752701791000",

@@ -239,15 +239,14 @@ export class Tab extends EventEmitter<TabEventsInterface> {
   }
 
   async captureTruncatedSnapshot(maxTokens: number, pageNum: number = 1): Promise<string> {
+    const tiktoken = await import('js-tiktoken');
+    const encoder = tiktoken.getEncoding('cl100k_base'); // Claude uses cl100k_base encoding
+    
     const fullSnapshot = await this._captureFullSnapshot();
 
     // Extract just the YAML content from the full snapshot
     const yamlMatch = fullSnapshot.match(/```yaml\n([\s\S]*?)\n```/);
     const rawSnapshot = yamlMatch ? yamlMatch[1] : '';
-
-    // Using the approximation of 0.75 words per token (or 4/3 tokens per word)
-    const wordsPerToken = 0.75;
-    const maxWordsPerPage = Math.floor(maxTokens * wordsPerToken);
 
     // Split the raw snapshot into lines
     const lines = rawSnapshot.split('\n');
@@ -293,21 +292,19 @@ export class Tab extends EventEmitter<TabEventsInterface> {
     // Second pass: create pages based on element boundaries
     const pages: { startLine: number; endLine: number; startElement: number; endElement: number }[] = [];
     let currentPageStart = 0;
-    let currentWordCount = 0;
+    let currentTokenCount = 0;
     let currentElementIndex = 0;
 
     for (let i = 0; i < elementBoundaries.length; i += 2) {
       const elementStart = elementBoundaries[i];
       const elementEnd = elementBoundaries[i + 1];
 
-      // Calculate words in this element
-      let elementWordCount = 0;
-      for (let j = elementStart; j < elementEnd; j++)
-        elementWordCount += lines[j].split(/\s+/).filter(w => w.length > 0).length;
-
+      // Calculate tokens in this element
+      const elementText = lines.slice(elementStart, elementEnd).join('\n');
+      const elementTokenCount = encoder.encode(elementText).length;
 
       // If adding this element would exceed page limit and we have content
-      if (currentWordCount + elementWordCount > maxWordsPerPage && currentWordCount > 0) {
+      if (currentTokenCount + elementTokenCount > maxTokens && currentTokenCount > 0) {
         // End current page
         pages.push({
           startLine: currentPageStart,
@@ -318,15 +315,15 @@ export class Tab extends EventEmitter<TabEventsInterface> {
 
         // Start new page
         currentPageStart = elementStart;
-        currentWordCount = elementWordCount;
+        currentTokenCount = elementTokenCount;
         currentElementIndex = i;
       } else {
-        currentWordCount += elementWordCount;
+        currentTokenCount += elementTokenCount;
       }
     }
 
     // Add final page
-    if (currentWordCount > 0) {
+    if (currentTokenCount > 0) {
       pages.push({
         startLine: currentPageStart,
         endLine: lines.length,
@@ -402,7 +399,8 @@ export class Tab extends EventEmitter<TabEventsInterface> {
 
     fullLines.push('```');
 
-    return fullLines.join('\n');
+    const result = fullLines.join('\n');
+    return result;
   }
 
   private _javaScriptBlocked(): boolean {
