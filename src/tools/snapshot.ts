@@ -16,7 +16,7 @@
 
 import { z } from 'zod';
 
-import { defineTool } from './tool.js';
+import { defineTabTool, defineTool } from './tool.js';
 import * as javascript from '../javascript.js';
 import { generateLocator } from './utils.js';
 
@@ -222,7 +222,7 @@ const clickSchema = elementSchema.extend({
   button: z.enum(['left', 'right', 'middle']).optional().describe('Button to click, defaults to left'),
 });
 
-const click = defineTool({
+const click = defineTabTool({
   capability: 'core',
   schema: {
     name: 'browser_click',
@@ -232,9 +232,8 @@ const click = defineTool({
     type: 'destructive',
   },
 
-  handle: async (context, params) => {
-    const tab = context.currentTabOrDie();
-    const locator = tab.snapshotOrDie().refLocator(params);
+  handle: async (tab, params) => {
+    const locator = await tab.refLocator(params);
     const button = params.button;
     const buttonAttr = button ? `{ button: '${button}' }` : '';
 
@@ -256,7 +255,7 @@ const click = defineTool({
   },
 });
 
-const drag = defineTool({
+const drag = defineTabTool({
   capability: 'core',
   schema: {
     name: 'browser_drag',
@@ -271,10 +270,11 @@ const drag = defineTool({
     type: 'destructive',
   },
 
-  handle: async (context, params) => {
-    const snapshot = context.currentTabOrDie().snapshotOrDie();
-    const startLocator = snapshot.refLocator({ ref: params.startRef, element: params.startElement });
-    const endLocator = snapshot.refLocator({ ref: params.endRef, element: params.endElement });
+  handle: async (tab, params) => {
+    const [startLocator, endLocator] = await tab.refLocators([
+      { ref: params.startRef, element: params.startElement },
+      { ref: params.endRef, element: params.endElement },
+    ]);
 
     const code = [
       `// Drag ${params.startElement} to ${params.endElement}`,
@@ -290,7 +290,7 @@ const drag = defineTool({
   },
 });
 
-const hover = defineTool({
+const hover = defineTabTool({
   capability: 'core',
   schema: {
     name: 'browser_hover',
@@ -300,9 +300,8 @@ const hover = defineTool({
     type: 'readOnly',
   },
 
-  handle: async (context, params) => {
-    const snapshot = context.currentTabOrDie().snapshotOrDie();
-    const locator = snapshot.refLocator(params);
+  handle: async (tab, params) => {
+    const locator = await tab.refLocator(params);
 
     const code = [
       `// Hover over ${params.element}`,
@@ -322,7 +321,7 @@ const selectOptionSchema = elementSchema.extend({
   values: z.array(z.string()).describe('Array of values to select in the dropdown. This can be a single value or multiple values.'),
 });
 
-const selectOption = defineTool({
+const selectOption = defineTabTool({
   capability: 'core',
   schema: {
     name: 'browser_select_option',
@@ -332,9 +331,8 @@ const selectOption = defineTool({
     type: 'destructive',
   },
 
-  handle: async (context, params) => {
-    const snapshot = context.currentTabOrDie().snapshotOrDie();
-    const locator = snapshot.refLocator(params);
+  handle: async (tab, params) => {
+    const locator = await tab.refLocator(params);
 
     const code = [
       `// Select options [${params.values.join(', ')}] in ${params.element}`,

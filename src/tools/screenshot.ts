@@ -16,7 +16,7 @@
 
 import { z } from 'zod';
 
-import { defineTool } from './tool.js';
+import { defineTabTool } from './tool.js';
 import * as javascript from '../javascript.js';
 import { outputFile } from '../config.js';
 import { generateLocator } from './utils.js';
@@ -51,7 +51,7 @@ const screenshotSchema = z.object({
   path: ['locator']
 });
 
-const screenshot = defineTool({
+const screenshot = defineTabTool({
   capability: 'core',
   schema: {
     name: 'browser_take_screenshot',
@@ -65,15 +65,13 @@ const screenshot = defineTool({
     },
   },
 
-  handle: async (context, params) => {
-    const tab = context.currentTabOrDie();
-    
+  handle: async (tab, params) => {
     // Determine file type: use format if provided, otherwise use raw flag
     const fileType = params.format || (params.raw ? 'png' : 'jpeg');
     
     // Generate filename if saving to file
-    const fileName = params.filename ? await outputFile(context.config, params.filename) : 
-                     await outputFile(context.config, `page-${new Date().toISOString()}.${fileType}`);
+    const fileName = params.filename ? await outputFile(tab.context.config, params.filename) : 
+                     await outputFile(tab.context.config, `page-${new Date().toISOString()}.${fileType}`);
     
     // Set quality for JPEG
     const quality = fileType === 'jpeg' ? (params.quality || 50) : undefined;
@@ -103,7 +101,7 @@ const screenshot = defineTool({
     // Only get snapshot when element screenshot is needed
     let locator = null;
     if (params.ref)
-      locator = tab.snapshotOrDie().refLocator({ element: params.element || '', ref: params.ref });
+      locator = await tab.refLocator({ element: params.element || '', ref: params.ref });
     else if (params.locator)
       locator = tab.page.locator(params.locator);
 
@@ -116,7 +114,7 @@ const screenshot = defineTool({
       code.push(`await page.screenshot(${javascript.formatObject(options)});`);
     }
 
-    const includeBase64 = context.clientSupportsImages();
+    const includeBase64 = tab.context.config.imageResponses !== 'omit';
     const action = async () => {
       if (params.locator) {
         const locatorElement = tab.page.locator(params.locator);
