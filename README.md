@@ -2,28 +2,11 @@
 
 An enhanced Model Context Protocol (MCP) server that provides browser automation capabilities using [Playwright](https://playwright.dev). This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models. **Includes stealth mode, video recording, HTML inspection tools, and more!**
 
-### Key Features
+### Additional Features in this Fork 🚀
 
-- **Fast and lightweight**. Uses Playwright's accessibility tree, not pixel-based input.
-- **LLM-friendly**. No vision models needed, operates purely on structured data.
-- **Deterministic tool application**. Avoids ambiguity common with screenshot-based approaches.
-- **Automatic snapshot pagination**. Large page content is automatically split into manageable chunks, preventing token limit errors in Claude and other LLMs.
+This fork includes several enhancements over the original:
 
-### 📄 Smart Pagination for Large Pages
-
-**Never worry about token limits!** This server automatically handles large web pages by:
-
-- **Automatic token counting** using tiktoken to accurately measure content size
-- **Smart pagination** that splits snapshots into multiple pages when they exceed limits
-- **Seamless navigation** through pages using `browser_snapshot` with `page` parameter
-- **Context preservation** across pages to maintain understanding of page structure
-
-Perfect for working with content-heavy sites like documentation, forums, or long articles without hitting Claude's token limits.
-
-### Enhanced Features 🚀
-
-This advanced version includes additional capabilities:
-
+- **📄 Automatic snapshot pagination**: Large page content is automatically split into manageable chunks, preventing token limit errors in Claude and other LLMs
 - **🥷 Stealth Mode**: Integrated with playwright-extra and puppeteer-extra-plugin-stealth to avoid bot detection
 - **🎥 Video Recording**: Record browser sessions with configurable video settings
 - **📄 HTML Tools**: Get inner/outer HTML content from specific elements or entire pages
@@ -31,6 +14,12 @@ This advanced version includes additional capabilities:
 - **📸 Enhanced Screenshot**: Support for full-page screenshots and element-specific captures
 - **🎯 Element Snapshots**: Get accessibility snapshots of specific elements using locators
 - **🐳 Docker Support**: Run in containerized environments with multiple browser options
+
+### Key Features (same as upstream)
+
+- **Fast and lightweight**. Uses Playwright's accessibility tree, not pixel-based input.
+- **LLM-friendly**. No vision models needed, operates purely on structured data.
+- **Deterministic tool application**. Avoids ambiguity common with screenshot-based approaches.
 
 ### Requirements
 - Node.js 18 or newer
