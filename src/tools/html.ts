@@ -43,26 +43,19 @@ const htmlContent = defineTool({
     },
   },
 
-  handle: async (context, params) => {
+  handle: async (context, params, response) => {
     const tab = context.currentTabOrDie();
     const isMultipleLocators = params.locators && params.locators.length > 0;
     const isSingleLocator = params.locator;
 
-    let code: string[] = [];
-    let action: () => Promise<{ content: { type: 'text'; text: string }[] }> = async () => ({
-      content: [{ type: 'text', text: 'No action defined' }]
-    });
-
-    if (isMultipleLocators) {
-      code = [
-        `// Get HTML content of multiple elements: ${params.locators!.join(', ')}`,
-        ...params.locators!.map(loc => `const html_${params.locators!.indexOf(loc)} = await page.locator('${loc}').innerHTML();`)
-      ];
-
-      action = async () => {
+    await tab.waitForCompletion(async () => {
+      if (isMultipleLocators) {
+        response.addCode(`// Get HTML content of multiple elements: ${params.locators!.join(', ')}`);
+        
         const htmlContents = await Promise.all(
           params.locators!.map(async (loc, index) => {
             try {
+              response.addCode(`const html_${index} = await page.locator('${loc}').innerHTML();`);
               const html = await tab.page.locator(loc).innerHTML();
               return `### Element ${index + 1} (${loc}):\n\`\`\`html\n${html}\n\`\`\``;
             } catch (error) {
@@ -70,32 +63,20 @@ const htmlContent = defineTool({
             }
           })
         );
-        return {
-          content: [{
-            type: 'text' as 'text',
-            text: htmlContents.join('\n\n')
-          }]
-        };
-      };
-    } else if (isSingleLocator) {
-      code = [
-        `// Get HTML content of element(s) by locator: ${params.locator}`,
-        `const elements = await page.locator('${params.locator}').all();`,
-        `const htmlContents = await Promise.all(elements.map(el => el.innerHTML()));`
-      ];
-
-      action = async () => {
+        
+        response.addResult(htmlContents.join('\n\n'));
+      } else if (isSingleLocator) {
+        response.addCode(`// Get HTML content of element(s) by locator: ${params.locator}`);
+        response.addCode(`const elements = await page.locator('${params.locator}').all();`);
+        response.addCode(`const htmlContents = await Promise.all(elements.map(el => el.innerHTML()));`);
+        
         try {
           const locator = tab.page.locator(params.locator!);
           const elements = await locator.all();
 
           if (elements.length === 0) {
-            return {
-              content: [{
-                type: 'text' as 'text',
-                text: `### Element HTML (${params.locator}):\nNo elements found with this locator`
-              }]
-            };
+            response.addResult(`### Element HTML (${params.locator}):\nNo elements found with this locator`);
+            return;
           }
 
           const htmlContents = await Promise.all(
@@ -109,44 +90,18 @@ const htmlContent = defineTool({
               })
           );
 
-          return {
-            content: [{
-              type: 'text' as 'text',
-              text: htmlContents.join('\n\n')
-            }]
-          };
+          response.addResult(htmlContents.join('\n\n'));
         } catch (error) {
-          return {
-            content: [{
-              type: 'text' as 'text',
-              text: `### Element HTML (${params.locator}):\nError: ${(error as Error).message}`
-            }]
-          };
+          response.addResult(`### Element HTML (${params.locator}):\nError: ${(error as Error).message}`);
         }
-      };
-    } else {
-      code = [
-        `// Get full page HTML content`,
-        `const html = await page.content();`
-      ];
-
-      action = async () => {
+      } else {
+        response.addCode(`// Get full page HTML content`);
+        response.addCode(`const html = await page.content();`);
+        
         const html = await tab.page.content();
-        return {
-          content: [{
-            type: 'text' as 'text',
-            text: `### Full Page HTML:\n\`\`\`html\n${html}\n\`\`\``
-          }]
-        };
-      };
-    }
-
-    return {
-      code,
-      action,
-      captureSnapshot: false,
-      waitForNetwork: false,
-    };
+        response.addResult(`### Full Page HTML:\n\`\`\`html\n${html}\n\`\`\``);
+      }
+    });
   }
 });
 
@@ -173,26 +128,19 @@ const outerHtmlContent = defineTool({
     },
   },
 
-  handle: async (context, params) => {
+  handle: async (context, params, response) => {
     const tab = context.currentTabOrDie();
     const isMultipleLocators = params.locators && params.locators.length > 0;
     const isSingleLocator = params.locator;
 
-    let code: string[] = [];
-    let action: () => Promise<{ content: { type: 'text'; text: string }[] }> = async () => ({
-      content: [{ type: 'text', text: 'No action defined' }]
-    });
-
-    if (isMultipleLocators) {
-      code = [
-        `// Get outer HTML content of multiple elements: ${params.locators!.join(', ')}`,
-        ...params.locators!.map(loc => `const outerHtml_${params.locators!.indexOf(loc)} = await page.locator('${loc}').evaluate(el => el.outerHTML);`)
-      ];
-
-      action = async () => {
+    await tab.waitForCompletion(async () => {
+      if (isMultipleLocators) {
+        response.addCode(`// Get outer HTML content of multiple elements: ${params.locators!.join(', ')}`);
+        
         const htmlContents = await Promise.all(
           params.locators!.map(async (loc, index) => {
             try {
+              response.addCode(`const outerHtml_${index} = await page.locator('${loc}').evaluate(el => el.outerHTML);`);
               const html = await tab.page.locator(loc).evaluate((el: Element) => el.outerHTML);
               return `### Element ${index + 1} (${loc}):\n\`\`\`html\n${html}\n\`\`\``;
             } catch (error) {
@@ -200,32 +148,20 @@ const outerHtmlContent = defineTool({
             }
           })
         );
-        return {
-          content: [{
-            type: 'text' as 'text',
-            text: htmlContents.join('\n\n')
-          }]
-        };
-      };
-    } else if (isSingleLocator) {
-      code = [
-        `// Get outer HTML content of element(s) by locator: ${params.locator}`,
-        `const elements = await page.locator('${params.locator}').all();`,
-        `const htmlContents = await Promise.all(elements.map(el => el.evaluate(el => el.outerHTML)));`
-      ];
-
-      action = async () => {
+        
+        response.addResult(htmlContents.join('\n\n'));
+      } else if (isSingleLocator) {
+        response.addCode(`// Get outer HTML content of element(s) by locator: ${params.locator}`);
+        response.addCode(`const elements = await page.locator('${params.locator}').all();`);
+        response.addCode(`const htmlContents = await Promise.all(elements.map(el => el.evaluate(el => el.outerHTML)));`);
+        
         try {
           const locator = tab.page.locator(params.locator!);
           const elements = await locator.all();
 
           if (elements.length === 0) {
-            return {
-              content: [{
-                type: 'text' as 'text',
-                text: `### Element Outer HTML (${params.locator}):\nNo elements found with this locator`
-              }]
-            };
+            response.addResult(`### Element Outer HTML (${params.locator}):\nNo elements found with this locator`);
+            return;
           }
 
           const htmlContents = await Promise.all(
@@ -239,29 +175,12 @@ const outerHtmlContent = defineTool({
               })
           );
 
-          return {
-            content: [{
-              type: 'text' as 'text',
-              text: htmlContents.join('\n\n')
-            }]
-          };
+          response.addResult(htmlContents.join('\n\n'));
         } catch (error) {
-          return {
-            content: [{
-              type: 'text' as 'text',
-              text: `### Element Outer HTML (${params.locator}):\nError: ${(error as Error).message}`
-            }]
-          };
+          response.addResult(`### Element Outer HTML (${params.locator}):\nError: ${(error as Error).message}`);
         }
-      };
-    }
-
-    return {
-      code,
-      action,
-      captureSnapshot: false,
-      waitForNetwork: false,
-    };
+      }
+    });
   }
 });
 

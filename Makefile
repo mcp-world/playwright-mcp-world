@@ -30,7 +30,7 @@ help:
 install: $(INSTALL_STAMP)
 
 $(INSTALL_STAMP): package.json package-lock.json
-	npm ci
+	npm install
 	@touch $(INSTALL_STAMP)
 
 ## Build - Compile TypeScript to JavaScript
