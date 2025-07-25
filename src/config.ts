@@ -47,6 +47,7 @@ export type CLIOptions = {
   saveSession?: boolean;
   saveTrace?: boolean;
   storageState?: string;
+  truncateSnapshot?: number;
   userAgent?: string;
   userDataDir?: string;
   viewportSize?: string;
@@ -70,6 +71,7 @@ const defaultConfig: FullConfig = {
   },
   server: {},
   outputDir: path.join(os.tmpdir(), 'playwright-mcp-output', sanitizeForFilePath(new Date().toISOString())),
+  truncateSnapshot: 20000,
 };
 
 type BrowserUserConfig = NonNullable<Config['browser']>;
@@ -83,6 +85,7 @@ export type FullConfig = Config & {
   network: NonNullable<Config['network']>,
   outputDir: string;
   server: NonNullable<Config['server']>,
+  truncateSnapshot: number;
 };
 
 export async function resolveConfig(config: Config): Promise<FullConfig> {
@@ -219,6 +222,7 @@ export function configFromCLIOptions(cliOptions: CLIOptions): Config {
     saveTrace: cliOptions.saveTrace,
     outputDir: cliOptions.outputDir,
     imageResponses: cliOptions.imageResponses,
+    truncateSnapshot: cliOptions.truncateSnapshot,
   };
 
   return result;
@@ -254,6 +258,7 @@ function configFromEnv(): Config {
   options.userAgent = envToString(process.env.PLAYWRIGHT_MCP_USER_AGENT);
   options.userDataDir = envToString(process.env.PLAYWRIGHT_MCP_USER_DATA_DIR);
   options.viewportSize = envToString(process.env.PLAYWRIGHT_MCP_VIEWPORT_SIZE);
+  options.truncateSnapshot = envToNumber(process.env.PLAYWRIGHT_MCP_TRUNCATE_SNAPSHOT);
   return configFromCLIOptions(options);
 }
 

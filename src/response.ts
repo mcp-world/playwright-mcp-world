@@ -66,6 +66,11 @@ export class Response {
   setIncludeTabs() {
     this._includeTabs = true;
   }
+  
+  setCustomSnapshot(snapshot: string) {
+    this._snapshot = snapshot;
+    this._includeSnapshot = true;
+  }
 
   async snapshot(): Promise<string> {
     if (this._snapshot !== undefined)
@@ -78,6 +83,21 @@ export class Response {
   }
 
   async serialize(): Promise<{ content: (TextContent | ImageContent)[] }> {
+    // If we have a custom snapshot and no other content, return just the snapshot
+    if (this._snapshot !== undefined && this._result.length === 0 && this._code.length === 0) {
+      const content: (TextContent | ImageContent)[] = [
+        { type: 'text', text: this._snapshot },
+      ];
+      
+      // Image attachments.
+      if (this._context.config.imageResponses !== 'omit') {
+        for (const image of this._images)
+          content.push({ type: 'image', data: image.data.toString('base64'), mimeType: image.contentType });
+      }
+      
+      return { content };
+    }
+    
     const response: string[] = [];
 
     // Start with command result.

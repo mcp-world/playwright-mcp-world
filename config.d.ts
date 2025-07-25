@@ -139,4 +139,9 @@ export type Config = {
    * Whether to send image responses to the client. Can be "allow", "omit", or "auto". Defaults to "auto", which sends images if the client can display them.
    */
   imageResponses?: 'allow' | 'omit';
+  
+  /**
+   * Maximum number of tokens for snapshots before truncation. Set to 0 to disable truncation. Defaults to 20000.
+   */
+  truncateSnapshot?: number;
 };

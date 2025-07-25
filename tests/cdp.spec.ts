@@ -48,7 +48,7 @@ test('cdp server reuse tab', async ({ cdpServer, startClient, server }) => {
   })).toHaveTextContent(`### Page state
 - Page URL: ${server.HELLO_WORLD}
 - Page Title: Title
-- Page Snapshot:
+- Page Snapshot (Page 1 of 1):
 \`\`\`yaml
 - generic [active] [ref=e1]: Hello, world!
 \`\`\`
