@@ -471,24 +471,12 @@ http.createServer(async (req, res) => {
 <!-- NOTE: This has been generated via update-readme.js -->
 
 - **browser_evaluate**
-  - Title: Evaluate JavaScript
-  - Description: Evaluate JavaScript expression on page or element
-  - Parameters:
-    - `function` (string): () => { /* code */ } or (element) => { /* code */ } when element is provided
-    - `element` (string, optional): Human-readable element description used to obtain permission to interact with the element
-    - `ref` (string, optional): Exact target element reference from the page snapshot
-  - Read-only: **false**
-
-<!-- NOTE: This has been generated via update-readme.js -->
-
-- **browser_evaluate**
   - Title: Execute JavaScript
   - Description: Execute JavaScript code in the browser context and return the result
   - Parameters:
-    - `expression` (string): JavaScript expression or function to evaluate
-    - `args` (array, optional): Arguments to pass to the function (must be serializable)
-    - `awaitPromise` (boolean, optional): Whether to wait for promises to resolve
-    - `timeout` (number, optional): Maximum execution time in milliseconds
+    - `function` (string): JavaScript function to evaluate: () => { /* code */ } or (element) => { /* code */ } when element is provided
+    - `element` (string, optional): Human-readable element description used to obtain permission to interact with the element
+    - `ref` (string, optional): Exact target element reference from the page snapshot
   - Read-only: **false**
 
 <!-- NOTE: This has been generated via update-readme.js -->
@@ -612,7 +600,6 @@ http.createServer(async (req, res) => {
   - Description: Capture accessibility snapshot of the current page, this is better than screenshot
   - Parameters:
     - `page` (number, optional): Page number to retrieve when snapshot is truncated. Defaults to 1.
-    - `truncateSnapshot` (boolean, optional): Whether to truncate large snapshots at 20000 tokens. Defaults to true.
   - Read-only: **true**
 
 <!-- NOTE: This has been generated via update-readme.js -->
