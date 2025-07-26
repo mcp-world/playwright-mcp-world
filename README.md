@@ -1,6 +1,6 @@
 ## Playwright MCP World 🌍 - Advanced Browser Automation
 
-An enhanced Model Context Protocol (MCP) server that provides browser automation capabilities using [Playwright](https://playwright.dev). This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models. **Includes stealth mode, video recording, HTML inspection tools, and more!**
+An enhanced fork of [microsoft/playwright-mcp](https://github.com/microsoft/playwright-mcp) with additional features for browser automation via MCP. **Includes automatic pagination, stealth mode, video recording, HTML inspection tools, and more!**
 
 ### Additional Features in this Fork 🚀
 
