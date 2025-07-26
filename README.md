@@ -7,7 +7,7 @@ An enhanced Model Context Protocol (MCP) server that provides browser automation
 This fork includes several enhancements over the original:
 
 - **📄 Automatic snapshot pagination**: Large page content is automatically split into manageable chunks, preventing token limit errors in Claude and other LLMs (fixes [#395](https://github.com/microsoft/playwright-mcp/issues/395))
-- **🥷 Stealth Mode**: Integrated with playwright-extra and puppeteer-extra-plugin-stealth to avoid bot detection
+- **🥷 Stealth Mode**: Integrated with playwright-extra and puppeteer-extra-plugin-stealth to avoid bot detection (fixes [#228](https://github.com/microsoft/playwright-mcp/pull/228))
 - **🎥 Video Recording**: Record browser sessions with configurable video settings
 - **📄 HTML Tools**: Get inner/outer HTML content from specific elements or entire pages
 - **💻 JavaScript Tools**: Enhanced JavaScript execution with better error handling
