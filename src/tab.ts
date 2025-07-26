@@ -343,7 +343,7 @@ export class Tab extends EventEmitter<TabEventsInterface> {
         `### Page state`,
         `- Page URL: ${this.page.url()}`,
         `- Page Title: ${await this.page.title()}`,
-        `- Page Snapshot (Page 1 of 1):`,
+        `- Page Snapshot:`,
         '```yaml',
         '',
         '```'
@@ -379,7 +379,7 @@ export class Tab extends EventEmitter<TabEventsInterface> {
     fullLines.push(`### Page state`);
     fullLines.push(`- Page URL: ${this.page.url()}`);
     fullLines.push(`- Page Title: ${await this.page.title()}`);
-    fullLines.push(`- Page Snapshot (Page ${actualPage} of ${totalPages}):`);
+    fullLines.push(totalPages === 1 ? `- Page Snapshot:` : `- Page Snapshot (Page ${actualPage} of ${totalPages}):`);
     fullLines.push('```yaml');
 
     if (contextPrefix)
