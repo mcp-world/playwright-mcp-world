@@ -212,28 +212,54 @@ export class Tab extends EventEmitter<TabEventsInterface> {
     return await this._captureFullSnapshot();
   }
 
-  private async _captureFullSnapshot(): Promise<string> {
-    const result: string[] = [];
+  private async _captureSnapshotComponents(): Promise<{
+    metadata: string[];
+    pageHeader: string[];
+    yamlContent: string;
+    hasModal: boolean;
+  }> {
     if (this.modalStates().length) {
-      result.push(...this.modalStatesMarkdown());
-      return result.join('\n');
+      return {
+        metadata: this.modalStatesMarkdown(),
+        pageHeader: [],
+        yamlContent: '',
+        hasModal: true
+      };
     }
 
-    result.push(...this._takeRecentConsoleMarkdown());
-    result.push(...this._listDownloadsMarkdown());
+    const metadata: string[] = [];
+    metadata.push(...this._takeRecentConsoleMarkdown());
+    metadata.push(...this._listDownloadsMarkdown());
+
+    let yamlContent = '';
+    const pageHeader: string[] = [];
 
     await this._raceAgainstModalStates(async () => {
-      const snapshot = await (this.page as PageEx)._snapshotForAI();
-      result.push(
-          `### Page state`,
-          `- Page URL: ${this.page.url()}`,
-          `- Page Title: ${await this.page.title()}`,
-          `- Page Snapshot:`,
-          '```yaml',
-          snapshot,
-          '```',
+      yamlContent = await (this.page as PageEx)._snapshotForAI();
+      pageHeader.push(
+        `### Page state`,
+        `- Page URL: ${this.page.url()}`,
+        `- Page Title: ${await this.page.title()}`
       );
     });
+
+    return { metadata, pageHeader, yamlContent, hasModal: false };
+  }
+
+  private async _captureFullSnapshot(): Promise<string> {
+    const components = await this._captureSnapshotComponents();
+    
+    if (components.hasModal) {
+      return components.metadata.join('\n');
+    }
+
+    const result: string[] = [];
+    result.push(...components.metadata);
+    result.push(...components.pageHeader);
+    result.push(`- Page Snapshot:`);
+    result.push('```yaml');
+    result.push(components.yamlContent);
+    result.push('```');
 
     return result.join('\n');
   }
@@ -242,20 +268,20 @@ export class Tab extends EventEmitter<TabEventsInterface> {
     const tiktoken = await import('js-tiktoken');
     const encoder = tiktoken.getEncoding('cl100k_base'); // Claude uses cl100k_base encoding
     
-    const fullSnapshot = await this._captureFullSnapshot();
-
-    // Extract metadata and YAML content separately
-    const yamlMatch = fullSnapshot.match(/([\s\S]*?)```yaml\n([\s\S]*?)\n```([\s\S]*)?/);
-    if (!yamlMatch) {
-      return fullSnapshot; // Return as-is if no YAML found
+    const components = await this._captureSnapshotComponents();
+    
+    // If modal state, return as-is
+    if (components.hasModal) {
+      return components.metadata.join('\n');
     }
 
-    const beforeYaml = yamlMatch[1];
-    const yamlContent = yamlMatch[2];
-    const afterYaml = yamlMatch[3] || '';
+    // If no YAML content, return full snapshot
+    if (!components.yamlContent) {
+      return await this._captureFullSnapshot();
+    }
 
     // Split the YAML content into lines for truncation
-    const lines = yamlContent.split('\n');
+    const lines = components.yamlContent.split('\n');
 
     // First pass: identify all element boundaries
     const elementBoundaries: number[] = [];
@@ -345,7 +371,7 @@ export class Tab extends EventEmitter<TabEventsInterface> {
 
     if (!pageInfo) {
       // Return the full snapshot if no pages (empty YAML)
-      return fullSnapshot;
+      return await this._captureFullSnapshot();
     }
 
     // Extract lines for current page
@@ -387,22 +413,23 @@ export class Tab extends EventEmitter<TabEventsInterface> {
     }
     
     // Reconstruct the full snapshot with preserved metadata
-    let result = beforeYaml.trimEnd();
+    const result: string[] = [];
     
-    // Update the page snapshot line if it exists
-    if (result.includes('- Page Snapshot:')) {
-      result = result.replace(
-        '- Page Snapshot:',
-        totalPages === 1 ? '- Page Snapshot:' : `- Page Snapshot (Page ${actualPage} of ${totalPages}):`
-      );
-    }
+    // Add metadata
+    result.push(...components.metadata);
     
-    result += '\n```yaml\n';
-    result += yamlLines.join('\n');
-    result += '\n```';
-    result += afterYaml;
+    // Add page header
+    result.push(...components.pageHeader);
     
-    return result;
+    // Add page snapshot line with pagination info
+    result.push(totalPages === 1 ? `- Page Snapshot:` : `- Page Snapshot (Page ${actualPage} of ${totalPages}):`);
+    
+    // Add YAML content
+    result.push('```yaml');
+    result.push(yamlLines.join('\n'));
+    result.push('```');
+    
+    return result.join('\n');
   }
 
   private _javaScriptBlocked(): boolean {
