@@ -9,7 +9,7 @@ This fork includes several enhancements over the original:
 - **📄 Automatic snapshot pagination**: Large page content is automatically split into manageable chunks, preventing token limit errors in Claude and other LLMs (fixes [#395](https://github.com/microsoft/playwright-mcp/issues/395))
 - **🥷 Stealth Mode**: Integrated with playwright-extra and puppeteer-extra-plugin-stealth to avoid bot detection (fixes [#228](https://github.com/microsoft/playwright-mcp/pull/228))
 - **🎥 Video Recording**: Record browser sessions with configurable video settings (fixes [#757](https://github.com/microsoft/playwright-mcp/pull/757), [#695](https://github.com/microsoft/playwright-mcp/issues/695), [#690](https://github.com/microsoft/playwright-mcp/pull/690), [#547](https://github.com/microsoft/playwright-mcp/pull/547), [#546](https://github.com/microsoft/playwright-mcp/issues/546), [#266](https://github.com/microsoft/playwright-mcp/issues/266))
-- **📄 HTML Tools**: Get inner/outer HTML content from specific elements or entire pages
+- **📄 HTML Tools**: Get inner/outer HTML content from specific elements or entire pages (fixes [#655](https://github.com/microsoft/playwright-mcp/pull/655), [#556](https://github.com/microsoft/playwright-mcp/issues/556), [#451](https://github.com/microsoft/playwright-mcp/issues/451), [#103](https://github.com/microsoft/playwright-mcp/issues/103))
 - **💻 JavaScript Tools**: Enhanced JavaScript execution with better error handling
 - **📸 Enhanced Screenshot**: Support for full-page screenshots and element-specific captures
 - **🎯 Element Snapshots**: Get accessibility snapshots of specific elements using locators
