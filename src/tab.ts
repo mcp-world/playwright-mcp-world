@@ -244,12 +244,18 @@ export class Tab extends EventEmitter<TabEventsInterface> {
     
     const fullSnapshot = await this._captureFullSnapshot();
 
-    // Extract just the YAML content from the full snapshot
-    const yamlMatch = fullSnapshot.match(/```yaml\n([\s\S]*?)\n```/);
-    const rawSnapshot = yamlMatch ? yamlMatch[1] : '';
+    // Extract metadata and YAML content separately
+    const yamlMatch = fullSnapshot.match(/([\s\S]*?)```yaml\n([\s\S]*?)\n```([\s\S]*)?/);
+    if (!yamlMatch) {
+      return fullSnapshot; // Return as-is if no YAML found
+    }
 
-    // Split the raw snapshot into lines
-    const lines = rawSnapshot.split('\n');
+    const beforeYaml = yamlMatch[1];
+    const yamlContent = yamlMatch[2];
+    const afterYaml = yamlMatch[3] || '';
+
+    // Split the YAML content into lines for truncation
+    const lines = yamlContent.split('\n');
 
     // First pass: identify all element boundaries
     const elementBoundaries: number[] = [];
@@ -338,17 +344,8 @@ export class Tab extends EventEmitter<TabEventsInterface> {
     const pageInfo = pages[actualPage - 1];
 
     if (!pageInfo) {
-      // Empty snapshot
-      const emptySnapshot = [
-        `### Page state`,
-        `- Page URL: ${this.page.url()}`,
-        `- Page Title: ${await this.page.title()}`,
-        `- Page Snapshot:`,
-        '```yaml',
-        '',
-        '```'
-      ].join('\n');
-      return emptySnapshot;
+      // Return the full snapshot if no pages (empty YAML)
+      return fullSnapshot;
     }
 
     // Extract lines for current page
@@ -372,34 +369,39 @@ export class Tab extends EventEmitter<TabEventsInterface> {
       }
     }
 
-    // Build custom snapshot content
-    const fullLines: string[] = [];
-
-    // Add page state header
-    fullLines.push(`### Page state`);
-    fullLines.push(`- Page URL: ${this.page.url()}`);
-    fullLines.push(`- Page Title: ${await this.page.title()}`);
-    fullLines.push(totalPages === 1 ? `- Page Snapshot:` : `- Page Snapshot (Page ${actualPage} of ${totalPages}):`);
-    fullLines.push('```yaml');
-
+    // Build the truncated YAML content
+    const yamlLines: string[] = [];
+    
     if (contextPrefix)
-      fullLines.push(contextPrefix.trim());
-
-
-    fullLines.push(pageLines.join('\n'));
-
+      yamlLines.push(contextPrefix.trim());
+    
+    yamlLines.push(pageLines.join('\n'));
+    
     if (actualPage < totalPages) {
-      fullLines.push('');
-      fullLines.push('# MORE CONTENT AVAILABLE');
-      fullLines.push(`# This is page ${actualPage} of ${totalPages}`);
-      fullLines.push(`# ${pageInfo.endElement - pageInfo.startElement} elements shown on this page`);
-      fullLines.push(`# ${Math.floor(elementBoundaries.length / 2) - pageInfo.endElement} more elements on remaining pages`);
-      fullLines.push(`# To load the next page, use browser_snapshot with page: ${actualPage + 1}`);
+      yamlLines.push('');
+      yamlLines.push('# MORE CONTENT AVAILABLE');
+      yamlLines.push(`# This is page ${actualPage} of ${totalPages}`);
+      yamlLines.push(`# ${pageInfo.endElement - pageInfo.startElement} elements shown on this page`);
+      yamlLines.push(`# ${Math.floor(elementBoundaries.length / 2) - pageInfo.endElement} more elements on remaining pages`);
+      yamlLines.push(`# To load the next page, use browser_snapshot with page: ${actualPage + 1}`);
     }
-
-    fullLines.push('```');
-
-    const result = fullLines.join('\n');
+    
+    // Reconstruct the full snapshot with preserved metadata
+    let result = beforeYaml.trimEnd();
+    
+    // Update the page snapshot line if it exists
+    if (result.includes('- Page Snapshot:')) {
+      result = result.replace(
+        '- Page Snapshot:',
+        totalPages === 1 ? '- Page Snapshot:' : `- Page Snapshot (Page ${actualPage} of ${totalPages}):`
+      );
+    }
+    
+    result += '\n```yaml\n';
+    result += yamlLines.join('\n');
+    result += '\n```';
+    result += afterYaml;
+    
     return result;
   }
 
